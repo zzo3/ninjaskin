@@ -15,7 +15,7 @@
         background: rgba(5, 5, 10, 0); /* 黑底透明 */
         font-family: 'Press Start 2P', cursive; /* 像素字體 */
         color: #e0e0ff;
-        font-size: 50%; /* 全局字體縮小 50% */
+        font-size: 70%; /* 全局字體放大 70% */
     }
 
     #chat-container {
@@ -38,7 +38,7 @@
         margin-bottom: 18px;
     }
 
-    /* 訊息框 */
+    /* 普通訊息框 */
     .message {
         display: inline-block;
         max-width: 100%;
@@ -67,14 +67,14 @@
         left: 12px;
         padding: 6px 12px;
         font-weight: 600;
-        font-size: 80%; /* 在全局 50% 基礎上再縮小 20% */
+        font-size: 100%; /* 放大基於全局字體 */
         background: rgba(0,0,0,0.4);
         border: 1px solid #8000ff;
         border-radius: 8px;
         z-index: 2;
     }
 
-    /* 平台顏色 */
+    /* 平台顏色框 */
     .username-box.twitch {
         color: #9146FF;
         border-color: #9146FF;
@@ -91,18 +91,35 @@
         text-shadow: 0 0 8px #53FC18;
     }
 
-    /* 平台 Logo 固定大小 */
-    .platform-icon {
-        height: 25px;
-        width: 25px;
-        margin-right: 6px;
-        vertical-align: middle;
-        filter: drop-shadow(0 0 4px currentColor);
+    /* Bot 訊息框 */
+    .message.bot {
+        border: 2px solid #555; /* 暗邊 */
+        box-shadow: 0 0 8px #333;
+        background: rgba(20,20,20,0.25);
+        color: #aaa;
+    }
+
+    /* 事件訊息樣式 */
+    .event-message {
+        display: inline-block;
+        max-width: 100%;
+        background: rgba(60, 0, 90, 0.8);
+        border: 3px solid #ff00ff;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 20px auto;
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 0 20px #ff00ff, 0 0 40px #00f0ff;
+        opacity: 0;
+        transform: scale(0.9);
+        animation: neonEventIn 1s ease forwards;
     }
 
     /* 文字內容 */
     .text {
-        font-size: 90%; /* 在全局 50% 基礎上再縮小 10% */
+        font-size: 100%; /* 放大基於全局字體 */
         line-height: 1.5;
     }
 
@@ -111,16 +128,19 @@
         from { opacity: 0; transform: translateY(25px) scale(0.95); }
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
+
+    @keyframes neonEventIn {
+        0% { opacity: 0; transform: scale(0.8); }
+        60% { opacity: 1; transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
   <div id="chat-container">
     <!-- Twitch 訊息 -->
     <div class="message-container">
-      <div class="username-box twitch">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Twitch-logo-color.svg" class="platform-icon" alt="Twitch">
-        StreamerName
-      </div>
+      <div class="username-box twitch">StreamerName</div>
       <div class="message">
         <div class="text">Hello from Twitch!</div>
       </div>
@@ -128,10 +148,7 @@
 
     <!-- YouTube 訊息 -->
     <div class="message-container">
-      <div class="username-box youtube">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" class="platform-icon" alt="YouTube">
-        ViewerName
-      </div>
+      <div class="username-box youtube">ViewerName</div>
       <div class="message">
         <div class="text">Hello from YouTube!</div>
       </div>
@@ -139,17 +156,30 @@
 
     <!-- Kick 訊息 -->
     <div class="message-container">
-      <div class="username-box kick">
-        <img src="https://seeklogo.com/images/K/kick-logo-1A3E2D3F7E-seeklogo.com.png" class="platform-icon" alt="Kick">
-        FanName
-      </div>
+      <div class="username-box kick">FanName</div>
       <div class="message">
         <div class="text">Hello from Kick!</div>
+      </div>
+    </div>
+
+    <!-- Bot 訊息 -->
+    <div class="message-container">
+      <div class="username-box">Bot</div>
+      <div class="message bot">
+        <div class="text">This is a system message from the bot.</div>
+      </div>
+    </div>
+
+    <!-- 事件訊息 -->
+    <div class="message-container">
+      <div class="event-message">
+        🎉 Viewer456 just subscribed! 🎉
       </div>
     </div>
   </div>
 </body>
 </html>
+
 
     </style>
 </head>
