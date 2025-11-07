@@ -15,6 +15,7 @@
         background: rgba(5, 5, 10, 0); /* 黑底透明 */
         font-family: 'Press Start 2P', cursive; /* 像素字體 */
         color: #e0e0ff;
+        font-size: 50%; /* 全局字體縮小 50% */
     }
 
     #chat-container {
@@ -28,17 +29,13 @@
         scroll-behavior: smooth;
     }
 
-#chat-container::-webkit-scrollbar {
-    display: none;
-}
+    #chat-container::-webkit-scrollbar {
+        display: none;
+    }
 
-/* Overlay size adjustments */
-.small-overlay #chat-container { transform: scale(0.75); }
-.large-overlay #chat-container { transform: scale(1.25); }
-
-.message-container {
-    position: relative;
-    margin-bottom: 18px;
+    .message-container {
+        position: relative;
+        margin-bottom: 18px;
     }
 
     /* 訊息框 */
@@ -60,7 +57,7 @@
         transition: all 0.3s ease;
     }
 
-    /* 使用者名稱框縮小 20% */
+    /* 使用者名稱框 */
     .username-box {
         display: inline-flex;
         align-items: center;
@@ -70,7 +67,7 @@
         left: 12px;
         padding: 6px 12px;
         font-weight: 600;
-        font-size: 80%; /* 縮小 20% */
+        font-size: 80%; /* 在全局 50% 基礎上再縮小 20% */
         background: rgba(0,0,0,0.4);
         border: 1px solid #8000ff;
         border-radius: 8px;
@@ -94,18 +91,18 @@
         text-shadow: 0 0 8px #53FC18;
     }
 
-    /* 平台圖示 */
+    /* 平台 Logo 固定大小 */
     .platform-icon {
-        height: 1em;
-        width: auto;
+        height: 25px;
+        width: 25px;
         margin-right: 6px;
         vertical-align: middle;
         filter: drop-shadow(0 0 4px currentColor);
     }
 
-    /* 文字內容縮小 10% */
+    /* 文字內容 */
     .text {
-        font-size: 90%; /* 縮小 10% */
+        font-size: 90%; /* 在全局 50% 基礎上再縮小 10% */
         line-height: 1.5;
     }
 
@@ -153,7 +150,6 @@
   </div>
 </body>
 </html>
-
 
     </style>
 </head>
