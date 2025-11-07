@@ -317,23 +317,19 @@
 			const messageDiv = document.createElement('div');
 			messageDiv.classList.add('message');
 
-			let sourceIcon = '';
-			if (data.type) {
-				const providerName = data.type.charAt(0).toUpperCase() + data.type.slice(1);
-				const iconUrl = `https://socialstream.ninja/sources/images/${data.type}.png`;
-				sourceIcon = `<img src="${iconUrl}" alt="${providerName}" class="source-icon" onerror="this.remove();">`;
-			}
+			let sourceIcon = ''; // 不顯示平台 icon
 
-			let chatbadges = "";
-			if (data.chatbadges) {
-				data.chatbadges.slice(0, 1).forEach(badge => {
-					if (typeof badge === "object" && badge.type === "img" && badge.src) {
-						chatbadges += `<img class='badge' src='${badge.src}' />`;
-					} else if (badge.type === "svg" && badge.html) {
-						chatbadges += `<span class='badge svg'>${badge.html}</span>`;
-					}
-				});
-			}
+let chatbadges = "";
+if (data.chatbadges) {
+    data.chatbadges.slice(0, 1).forEach(badge => {
+        if (typeof badge === "object" && badge.type === "img" && badge.src) {
+            chatbadges += `<img class='badge' src='${badge.src}' />`;
+        } else if (badge.type === "svg" && badge.html) {
+            chatbadges += `<span class='badge svg'>${badge.html}</span>`;
+        }
+    });
+}
+
 
 			messageDiv.innerHTML = `
 				<div class="username-box">
