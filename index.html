@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Neon Pixel Overlay</title>
+  <title>Neon Overlay</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     body, html {
         margin: 0;
@@ -12,10 +12,10 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: rgba(5, 5, 10, 0); /* 黑底透明 */
-        font-family: 'Press Start 2P', cursive; /* 像素字體 */
+        background: rgba(5, 5, 10, 0);
+        font-family: 'Roboto', sans-serif;
         color: #e0e0ff;
-        font-size: 70%; /* 全局字體放大 70% */
+        font-size: 70%;
     }
 
     #chat-container {
@@ -28,21 +28,14 @@
         margin: auto;
         scroll-behavior: smooth;
     }
+    #chat-container::-webkit-scrollbar { display: none; }
 
-    #chat-container::-webkit-scrollbar {
-        display: none;
-    }
+    .message-container { position: relative; margin-bottom: 18px; }
 
-    .message-container {
-        position: relative;
-        margin-bottom: 18px;
-    }
-
-    /* 普通訊息框 */
     .message {
         display: inline-block;
         max-width: 100%;
-        background: rgba(20,20,40,0.25); /* 透明度 0.25 */
+        background: rgba(20,20,40,0.25);
         border: 2px solid #00f0ff;
         border-radius: 14px;
         padding: 28px 14px 14px 14px;
@@ -57,7 +50,6 @@
         transition: all 0.3s ease;
     }
 
-    /* 使用者名稱框 */
     .username-box {
         display: inline-flex;
         align-items: center;
@@ -67,14 +59,13 @@
         left: 12px;
         padding: 6px 12px;
         font-weight: 600;
-        font-size: 100%; /* 放大基於全局字體 */
+        font-size: 100%;
         background: rgba(0,0,0,0.4);
         border: 1px solid #8000ff;
         border-radius: 8px;
         z-index: 2;
     }
 
-    /* 平台顏色框 */
     .username-box.twitch {
         color: #9146FF;
         border-color: #9146FF;
@@ -91,7 +82,6 @@
         text-shadow: 0 0 8px #53FC18;
     }
 
-    /* 平台 icon 統一大小 */
     .source-icon {
         width: 25px;
         height: 25px;
@@ -100,15 +90,13 @@
         filter: drop-shadow(0 0 4px currentColor);
     }
 
-    /* Bot 訊息框 */
     .message.bot {
-        border: 2px solid #555; /* 暗邊 */
+        border: 2px solid #555;
         box-shadow: 0 0 8px #333;
         background: rgba(20,20,20,0.25);
         color: #aaa;
     }
 
-    /* 漸層霓虹事件訊息 */
     .event-message {
         display: inline-block;
         max-width: 100%;
@@ -128,8 +116,6 @@
         transform: scale(0.9);
         animation: neonEventIn 1s ease forwards, gradientShift 3s linear infinite;
     }
-
-    /* 漸層霓虹文字效果 */
     .event-message span {
         background: linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff);
         background-size: 200% auto;
@@ -138,30 +124,22 @@
         animation: textGradientShift 3s linear infinite;
     }
 
-    /* 文字內容 */
-    .text {
-        font-size: 100%; /* 放大基於全局字體 */
-        line-height: 1.5;
-    }
+    .text { font-size: 100%; line-height: 1.5; }
 
-    /* 動畫效果 */
     @keyframes neonSlideIn {
         from { opacity: 0; transform: translateY(25px) scale(0.95); }
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
-
     @keyframes neonEventIn {
         0% { opacity: 0; transform: scale(0.8); }
         60% { opacity: 1; transform: scale(1.1); }
         100% { transform: scale(1); }
     }
-
     @keyframes gradientShift {
         0% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff); }
         50% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #00f0ff, #ff00ff, #00f0ff); }
         100% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff); }
     }
-
     @keyframes textGradientShift {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
@@ -170,244 +148,174 @@
   </style>
 </head>
 <body>
-  <div id="chat-container">
-    <!-- Twitch 訊息 -->
-    <div class="message-container">
-      <div class="username-box twitch">
-        <img src="https://socialstream.ninja/sources/images/twitch.png" class="source-icon" alt="Twitch">
-        StreamerName
-      </div>
-      <div class="message">
-        <div class="text">Hello from Twitch!</div>
-      </div>
-    </div>
+  <div id="chat-container"></div>
 
-    <!-- YouTube 訊息 -->
-    <div class="message-container">
-      <div class="username-box youtube">
-        <img src="https://socialstream.ninja/sources/images/youtube.png" class="source-icon" alt="YouTube">
-        ViewerName
-      </div>
-      <div class="message">
-        <div class="text">Hello from YouTube!</div>
-      </div>
-    </div>
-
-    <!-- Kick 訊息 -->
-    <div class="message-container">
-      <div class="username-box kick">
-        <img src="https://socialstream.ninja/sources/images/kick.png" class="source-icon" alt="Kick">
-        FanName
-      </div>
-      <div class="message">
-        <div class="text">Hello from Kick!</div>
-      </div>
-    </div>
-
-    <!-- Bot 訊息 -->
-    <div class="message-container">
-      <div class="username-box">Bot</div>
-      <div class="message bot">
-        <div class="text">This is a system message from the bot.</div>
-      </div>
-    </div>
-
-    <!-- 事件訊息 -->
-    <
-    </style>
-</head>
-<body>
-    <div id="chat-container"></div>
 <script>
-	const chatContainer = document.getElementById('chat-container');
-	let lastSender = null;
-	let lastMessageDiv = null;
+  const chatContainer = document.getElementById('chat-container');
+  let lastSender = null;
+  let lastMessageDiv = null;
 
-	// Parameters for Social Stream Ninja
-	const urlParams = new URLSearchParams(window.location.search);
-	const roomID = urlParams.get("session") || "7RUWtGBfz2";
-	const password = "false";
-	const featuredMode = false;
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomID = urlParams.get("session") || "7RUWtGBfz2";
+  const password = "false";
+  const featuredMode = false;
 
-	// Function to apply overlay size based on URL parameter
-	function applyOverlaySize() {
-		const size = urlParams.get('size'); // Get the 'size' parameter
-		document.body.classList.remove("small-overlay", "large-overlay"); // Reset any existing classes
-		if (size === "small") {
-			document.body.classList.add("small-overlay");
-		} else if (size === "large") {
-			document.body.classList.add("large-overlay");
-		}
-	}
+  function applyOverlaySize() {
+    const size = urlParams.get('size');
+    document.body.classList.remove("small-overlay", "large-overlay");
+    if (size === "small") document.body.classList.add("small-overlay");
+    else if (size === "large") document.body.classList.add("large-overlay");
+  }
 
-	function isFullyVisible(element) {
-		const containerRect = chatContainer.getBoundingClientRect();
-		const elementRect = element.getBoundingClientRect();
-		return elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
-	}
+  function isFullyVisible(element) {
+    const containerRect = chatContainer.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    return elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
+  }
 
-	function removeCutOffMessages() {
-		let firstMessage = chatContainer.firstElementChild;
-		while (firstMessage && !isFullyVisible(firstMessage)) {
-			chatContainer.removeChild(firstMessage);
-			firstMessage = chatContainer.firstElementChild;
-		}
-	}
+  function removeCutOffMessages() {
+    let firstMessage = chatContainer.firstElementChild;
+    while (firstMessage && !isFullyVisible(firstMessage)) {
+      chatContainer.removeChild(firstMessage);
+      firstMessage = chatContainer.firstElementChild;
+    }
+  }
 
-	function autoScroll() {
-		const lastMessage = chatContainer.lastElementChild;
-		if (lastMessage) {
-			lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
-			setTimeout(() => {
-				lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
-				removeCutOffMessages();
-			}, 50);
-		}
-	}
+  function autoScroll() {
+    const lastMessage = chatContainer.lastElementChild;
+    if (lastMessage) {
+      lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
+      setTimeout(() => {
+        lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
+        removeCutOffMessages();
+      }, 50);
+    }
+  }
 
-	const observer = new MutationObserver(() => {
-		autoScroll();
-	});
-	observer.observe(chatContainer, { childList: true, subtree: true });
+  const observer = new MutationObserver(autoScroll);
+  observer.observe(chatContainer, { childList: true, subtree: true });
 
-	function addEventToOverlay(data) {
-		const eventDiv = document.createElement('div');
-		eventDiv.classList.add('event-message');
-		let eventText = '';
+  // 事件訊息
+  function addEventToOverlay(data) {
+    const eventDiv = document.createElement('div');
+    eventDiv.classList.add('event-message');
+    let eventText = '';
+    if (data.type === 'follow') eventText = `${data.chatname} just followed!`;
+    else if (data.type === 'subscription') eventText = `${data.chatname} subscribed!`;
+    else if (data.type === 'donation') eventText = `${data.chatname} donated ${data.amount || ''}!`;
+    eventDiv.innerHTML = `<span>🎉 ${eventText} 🎉</span>`;
+    chatContainer.appendChild(eventDiv);
+  }
 
-		if (data.type === 'follow') {
-			eventText = `${data.chatname} just followed!`;
-		} else if (data.type === 'subscription') {
-			eventText = `${data.chatname} subscribed!`;
-		} else if (data.type === 'donation') {
-			eventText = `${data.chatname} donated ${data.amount || ''}!`;
-		}
+  // 聊天訊息
+  function addMessageToOverlay(data) {
+    if (!data || !data.chatname || !data.chatmessage) return;
+    if (['follow','subscription','donation'].includes(data.type)) {
+      addEventToOverlay(data);
+      return;
+    }
 
-		eventDiv.innerHTML = `<div>${eventText}</div>`;
-		chatContainer.appendChild(eventDiv);
-	}
+    if (lastSender === data.chatname && lastMessageDiv) {
+      const textDiv = document.createElement('div');
+      textDiv.classList.add('text');
+      textDiv.innerHTML = data.chatmessage;
+      lastMessageDiv.querySelector('.message').appendChild(textDiv);
+    } else {
+      const messageContainer = document.createElement('div');
+      messageContainer.classList.add('message-container');
 
-	function addMessageToOverlay(data) {
-		if (!data || !data.chatname || !data.chatmessage) {
-			console.error("Invalid message data", data);
-			return;
-		}
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      if (data.type === 'bot') messageDiv.classList.add('bot');
 
-		// Skip meta-only messages (follower/viewer data without actual content)
-		if (!data.chatname && data.meta) {
-			return;
-		}
+      // 平台 icon
+      let sourceIcon = '';
+      if (data.type && data.type !== 'bot') {
+        const providerName = data.type.charAt(0).toUpperCase() + data.type.slice(1);
+        const iconUrl = `https://socialstream.ninja/sources/images/${data.type}.png`;
+        sourceIcon = `<img src="${iconUrl}" alt="${providerName}" class="source-icon" onerror="this.remove();">`;
+      }
 
-		if (['follow', 'subscription', 'donation'].includes(data.type)) {
-			addEventToOverlay(data);
-			return;
-		}
-
-		if (lastSender === data.chatname && lastMessageDiv) {
-			// Append new message to the existing message container
-			const textDiv = document.createElement('div');
-			textDiv.classList.add('text');
-			textDiv.innerHTML = data.chatmessage || '';
-			lastMessageDiv.querySelector('.message').appendChild(textDiv);
-		} else {
-			// Create a new message container
-			const messageContainer = document.createElement('div');
-			messageContainer.classList.add('message-container');
-			
-			const messageDiv = document.createElement('div');
-			messageDiv.classList.add('message');
-
-			let sourceIcon = ''; // 不顯示平台 icon
-
-let chatbadges = "";
-if (data.chatbadges) {
-    data.chatbadges.slice(0, 1).forEach(badge => {
-        if (typeof badge === "object" && badge.type === "img" && badge.src) {
+      // 徽章
+      let chatbadges = "";
+      if (data.chatbadges) {
+        data.chatbadges.slice(0, 1).forEach(badge => {
+          if (badge.type === "img" && badge.src) {
             chatbadges += `<img class='badge' src='${badge.src}' />`;
-        } else if (badge.type === "svg" && badge.html) {
+          } else if (badge.type === "svg" && badge.html) {
             chatbadges += `<span class='badge svg'>${badge.html}</span>`;
+          }
+        });
+      }
+
+      messageDiv.innerHTML = `
+        <div class="username-box ${data.type || ''}">
+          ${sourceIcon}
+          <span>${data.chatname}</span>
+          <span class="badges">${chatbadges}</span>
+        </div>
+        <div class="text">${data.chatmessage}</div>
+      `;
+
+      messageContainer.appendChild(messageDiv);
+      chatContainer.appendChild(messageContainer);
+
+      lastSender = data.chatname;
+      lastMessageDiv = messageContainer;
+    }
+  }
+
+  // iframe 連接
+  const iframe = document.createElement("iframe");
+  iframe.src = featuredMode
+    ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+    : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+  iframe.style.cssText = "width:0;height:0;position:fixed;left:-100px;top:-100px;";
+  document.body.appendChild(iframe);
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== iframe.contentWindow) return;
+    if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
+      addMessageToOverlay(event.data.dataReceived.overlayNinja);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', applyOverlaySize);
+
+  // WebSocket 連接
+  let conCon = 1;
+  let socketserver = false;
+  let serverURL = urlParams.has("localserver") ? "ws://127.0.0.1:3000" : "wss://io.socialstream.ninja";
+
+  function setupSocket() {
+    socketserver.onclose = function () {
+      setTimeout(function () {
+        conCon += 1;
+        socketserver = new WebSocket(serverURL);
+        setupSocket();
+      }, 100 * conCon);
+    };
+    socketserver.onopen = function () {
+      conCon = 1;
+      socketserver.send(JSON.stringify({ "join": roomID, "out": 3, "in": 4 }));
+    };
+    socketserver.addEventListener('message', function (event) {
+      if (event.data) {
+        const data = JSON.parse(event.data);
+        addMessageToOverlay(data);
+        if (data.get) {
+          socketserver.send(JSON.stringify({ callback: { get: data.get, result: true } }));
         }
+      }
     });
-}
+  }
 
-
-			messageDiv.innerHTML = `
-				<div class="username-box">
-					${sourceIcon}
-					<span>${data.chatname}</span>
-					<span class="badges">${chatbadges}</span>
-				</div>
-				<div class="text">${data.chatmessage || ''}</div>
-				${(data.donation || data.hasDonation) ? `<div class="donation">${(data.donation || data.hasDonation)}</div>` : ''}
-			`;
-
-			messageContainer.appendChild(messageDiv);
-			chatContainer.appendChild(messageContainer);
-
-			lastSender = data.chatname;
-			lastMessageDiv = messageContainer;
-		}
-	}
-	
-	const iframe = document.createElement("iframe");
-	iframe.src = featuredMode
-		? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
-		: `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
-
-	iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
-	document.body.appendChild(iframe);
-
-	window.addEventListener("message", (event) => {
-		if (event.source !== iframe.contentWindow) return;
-		if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
-			addMessageToOverlay(event.data.dataReceived.overlayNinja);
-		}
-	});
-
-	document.addEventListener('DOMContentLoaded', () => {
-		applyOverlaySize(); // Apply overlay size based on URL parameter
-	});
-		
-			
-	// The Websocket mode is an alternative to using p2p mode; useful if your OBS or system refuses to use IFrames/P2P.
-	var conCon = 1;
-	var socketserver = false;
-	// localserver mode can be used via the stand-alone app; file-> enable local server, or use the publicly hosted one.
-	var serverURL = urlParams.has("localserver") ? "ws://127.0.0.1:3000" : "wss://io.socialstream.ninja";
-
-	function setupSocket(){
-		socketserver.onclose = function (){
-			setTimeout(function(){
-				conCon+=1;
-				socketserver = new WebSocket(serverURL);
-				setupSocket();
-			},100*conCon);
-		};
-		socketserver.onopen = function (){
-			conCon = 1;
-			socketserver.send(JSON.stringify({"join":roomID, "out":3, "in":4}));
-		};
-		socketserver.addEventListener('message', function (event) {
-			var resp = false
-			if (event.data){
-				var data = JSON.parse(event.data);
-				addMessageToOverlay(data);
-				if (data.get){
-					var ret = {};
-					ret.callback = {};
-					ret.callback.get = data.get
-					ret.callback.result = true;
-					socketserver.send(JSON.stringify(ret));
-				}
-			}
-		});
-	}
-	
-	if (urlParams.has("server") || urlParams.has("server2")){ // opt-in to use. Must also be enabled in the menu as well.
-		serverURL = urlParams.get("server") ||  urlParams.get("server2") || serverURL;
-		socketserver = new WebSocket(serverURL);
-		setupSocket();
-	}
+  if (urlParams.has("server") || urlParams.has("server2")) {
+    serverURL = urlParams.get("server") || urlParams.get("server2") || serverURL;
+    socketserver = new WebSocket(serverURL);
+    setupSocket();
+  }
 </script>
 </body>
 </html>
+
