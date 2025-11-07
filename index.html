@@ -91,6 +91,15 @@
         text-shadow: 0 0 8px #53FC18;
     }
 
+    /* 平台 icon 統一大小 */
+    .source-icon {
+        width: 25px;
+        height: 25px;
+        margin-right: 6px;
+        vertical-align: middle;
+        filter: drop-shadow(0 0 4px currentColor);
+    }
+
     /* Bot 訊息框 */
     .message.bot {
         border: 2px solid #555; /* 暗邊 */
@@ -164,7 +173,10 @@
   <div id="chat-container">
     <!-- Twitch 訊息 -->
     <div class="message-container">
-      <div class="username-box twitch">StreamerName</div>
+      <div class="username-box twitch">
+        <img src="https://socialstream.ninja/sources/images/twitch.png" class="source-icon" alt="Twitch">
+        StreamerName
+      </div>
       <div class="message">
         <div class="text">Hello from Twitch!</div>
       </div>
@@ -172,7 +184,10 @@
 
     <!-- YouTube 訊息 -->
     <div class="message-container">
-      <div class="username-box youtube">ViewerName</div>
+      <div class="username-box youtube">
+        <img src="https://socialstream.ninja/sources/images/youtube.png" class="source-icon" alt="YouTube">
+        ViewerName
+      </div>
       <div class="message">
         <div class="text">Hello from YouTube!</div>
       </div>
@@ -180,7 +195,10 @@
 
     <!-- Kick 訊息 -->
     <div class="message-container">
-      <div class="username-box kick">FanName</div>
+      <div class="username-box kick">
+        <img src="https://socialstream.ninja/sources/images/kick.png" class="source-icon" alt="Kick">
+        FanName
+      </div>
       <div class="message">
         <div class="text">Hello from Kick!</div>
       </div>
@@ -195,15 +213,7 @@
     </div>
 
     <!-- 事件訊息 -->
-    <div class="message-container">
-      <div class="event-message">
-        <span>🎉 Viewer456 just subscribed! 🎉</span>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-
+    <
     </style>
 </head>
 <body>
