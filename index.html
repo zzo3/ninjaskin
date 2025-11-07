@@ -107,7 +107,6 @@
         border-radius: 16px;
         padding: 20px;
         margin: 20px auto;
-        color: #fff;
         font-weight: bold;
         text-align: center;
         border: 3px solid transparent;
@@ -119,6 +118,15 @@
         opacity: 0;
         transform: scale(0.9);
         animation: neonEventIn 1s ease forwards, gradientShift 3s linear infinite;
+    }
+
+    /* 漸層霓虹文字效果 */
+    .event-message span {
+        background: linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: textGradientShift 3s linear infinite;
     }
 
     /* 文字內容 */
@@ -143,6 +151,12 @@
         0% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff); }
         50% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #00f0ff, #ff00ff, #00f0ff); }
         100% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff); }
+    }
+
+    @keyframes textGradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
   </style>
 </head>
@@ -183,7 +197,7 @@
     <!-- 事件訊息 -->
     <div class="message-container">
       <div class="event-message">
-        🎉 Viewer456 just subscribed! 🎉
+        <span>🎉 Viewer456 just subscribed! 🎉</span>
       </div>
     </div>
   </div>
