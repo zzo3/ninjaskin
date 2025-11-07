@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Overlay</title>
-    <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap');
+  <meta charset="UTF-8">
+  <title>Neon Pixel Overlay</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: rgba(5, 5, 10, 0); /* 黑底透明 */
-    font-family: 'Orbitron', sans-serif;
-    color: #e0e0ff;
-}
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: rgba(5, 5, 10, 0); /* 黑底透明 */
+        font-family: 'Press Start 2P', cursive; /* 像素字體 */
+        color: #e0e0ff;
+    }
 
-#chat-container {
-    padding: 25px;
-    max-width: 420px;
-    height: 100%;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    margin: auto;
-    scroll-behavior: smooth;
-}
+    #chat-container {
+        padding: 25px;
+        max-width: 420px;
+        height: 100%;
+        overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin: auto;
+        scroll-behavior: smooth;
+    }
 
 #chat-container::-webkit-scrollbar {
     display: none;
@@ -40,98 +39,122 @@ body, html {
 .message-container {
     position: relative;
     margin-bottom: 18px;
-}
+    }
 
-/* 普通訊息框 */
-.message {
-    display: inline-block;
-    max-width: 100%;
-    background: rgba(20, 20, 40, 0.85);
-    border: 2px solid #00f0ff;
-    border-radius: 14px;
-    padding: 28px 14px 14px 14px;
-    margin-top: 28px;
-    margin-left: 20px;
-    color: #e0e0ff;
-    box-shadow: 0 0 12px #00f0ff, 0 0 24px #8000ff;
-    opacity: 0;
-    transform: translateX(-25px);
-    animation: neonSlideIn 0.7s ease forwards;
-    word-wrap: break-word;
-    transition: all 0.3s ease;
-}
+    /* 訊息框 */
+    .message {
+        display: inline-block;
+        max-width: 100%;
+        background: rgba(20,20,40,0.25); /* 透明度 0.25 */
+        border: 2px solid #00f0ff;
+        border-radius: 14px;
+        padding: 28px 14px 14px 14px;
+        margin-top: 28px;
+        margin-left: 20px;
+        color: #e0e0ff;
+        box-shadow: 0 0 12px #00f0ff, 0 0 24px #8000ff;
+        opacity: 0;
+        transform: translateX(-25px);
+        animation: neonSlideIn 0.7s ease forwards;
+        word-wrap: break-word;
+        transition: all 0.3s ease;
+    }
 
-/* 使用者名稱框 */
-.username-box {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    position: absolute;
-    top: -24px;
-    left: 12px;
-    padding: 6px 12px;
-    font-weight: 600;
-    color: #00f0ff;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid #8000ff;
-    border-radius: 8px;
-    text-shadow: 0 0 8px #00f0ff, 0 0 12px #8000ff;
-    z-index: 2;
-}
+    /* 使用者名稱框縮小 20% */
+    .username-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        position: absolute;
+        top: -24px;
+        left: 12px;
+        padding: 6px 12px;
+        font-weight: 600;
+        font-size: 80%; /* 縮小 20% */
+        background: rgba(0,0,0,0.4);
+        border: 1px solid #8000ff;
+        border-radius: 8px;
+        z-index: 2;
+    }
 
-/* 徽章 */
-.badges, .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-.badge {
-    height: 1em;
-    width: auto;
-    vertical-align: middle;
-}
+    /* 平台顏色 */
+    .username-box.twitch {
+        color: #9146FF;
+        border-color: #9146FF;
+        text-shadow: 0 0 8px #9146FF;
+    }
+    .username-box.youtube {
+        color: #FF0000;
+        border-color: #FF0000;
+        text-shadow: 0 0 8px #FF0000;
+    }
+    .username-box.kick {
+        color: #53FC18;
+        border-color: #53FC18;
+        text-shadow: 0 0 8px #53FC18;
+    }
 
-/* 來源圖示 */
-.source-icon {
-    height: 1em;
-    vertical-align: middle;
-}
+    /* 平台圖示 */
+    .platform-icon {
+        height: 1em;
+        width: auto;
+        margin-right: 6px;
+        vertical-align: middle;
+        filter: drop-shadow(0 0 4px currentColor);
+    }
 
-/* 特殊事件訊息 */
-.event-message {
-    background: rgba(30, 0, 60, 0.9);
-    color: #ff00ff;
-    border-radius: 12px;
-    padding: 14px;
-    font-weight: bold;
-    box-shadow: 0 0 16px #ff00ff, 0 0 32px #00f0ff;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: neonBounceIn 0.9s ease forwards;
-}
+    /* 文字內容縮小 10% */
+    .text {
+        font-size: 90%; /* 縮小 10% */
+        line-height: 1.5;
+    }
 
-/* 文字內容 */
-.text {
-    font-size: clamp(0.9em, 2.5vw, 1.1em);
-    line-height: 1.5;
-}
-.text img {
-    max-width: 1.6em;
-    max-height: 1.6em;
-    vertical-align: middle;
-}
+    /* 動畫效果 */
+    @keyframes neonSlideIn {
+        from { opacity: 0; transform: translateY(25px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <!-- Twitch 訊息 -->
+    <div class="message-container">
+      <div class="username-box twitch">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Twitch-logo-color.svg" class="platform-icon" alt="Twitch">
+        StreamerName
+      </div>
+      <div class="message">
+        <div class="text">Hello from Twitch!</div>
+      </div>
+    </div>
 
-/* 動畫效果 */
-@keyframes neonSlideIn {
-    from { opacity: 0; transform: translateY(25px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
+    <!-- YouTube 訊息 -->
+    <div class="message-container">
+      <div class="username-box youtube">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" class="platform-icon" alt="YouTube">
+        ViewerName
+      </div>
+      <div class="message">
+        <div class="text">Hello from YouTube!</div>
+      </div>
+    </div>
 
-@keyframes neonBounceIn {
-    0% { transform: scale(0.8); opacity: 0; }
-    60% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
-}
+    <!-- Kick 訊息 -->
+    <div class="message-container">
+      <div class="username-box kick">
+        <img src="https://seeklogo.com/images/K/kick-logo-1A3E2D3F7E-seeklogo.com.png" class="platform-icon" alt="Kick">
+        FanName
+      </div>
+      <div class="message">
+        <div class="text">Hello from Kick!</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+
     </style>
 </head>
 <body>
