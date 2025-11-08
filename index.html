@@ -55,8 +55,8 @@ html, body {
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeOutOnly {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  from { opacity: 1; color: #fff; }
+  to   { opacity: 0; color: #aaa; }
 }
 
 /* 訊息框 */
@@ -76,7 +76,7 @@ html, body {
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
 }
 
-/* 名稱框：無背景，僅邊框顏色，透明度0.1 */
+/* 名稱框：無背景，字體透明度0.9，邊框透明度0.9 */
 .username-box {
   position: absolute;
   bottom: 100%; /* 放在訊息框上方 */
@@ -86,18 +86,17 @@ html, body {
   border-radius: 10px;
   font-weight: 600;
   z-index: 2;
-  background: transparent;
-  border: 2px solid;
-  opacity: 0.1; /* 邊框透明度 */
+  background: transparent; /* 無背景 */
   font-size: 0.85em;
   text-shadow: 1px 1px 2px #000;
+  opacity: 0.9; /* 字體透明度 */
 }
 
-/* 平台樣式：邊框顏色 */
-.username-box.twitch { border-color: #9146FF; color: #9146FF; }
-.username-box.youtube { border-color: #FF0000; color: #FF0000; }
-.username-box.kick { border-color: #00FF80; color: #00FF80; }
-.username-box.facebook { border-color: #3b5998; color: #3b5998; }
+/* 平台樣式：邊框顏色透明度0.9 */
+.username-box.twitch { border: 2px solid rgba(145,70,255,0.9); color: rgba(145,70,255,0.9); }
+.username-box.youtube { border: 2px solid rgba(255,0,0,0.9); color: rgba(255,0,0,0.9); }
+.username-box.kick { border: 2px solid rgba(0,255,128,0.9); color: rgba(0,255,128,0.9); }
+.username-box.facebook { border: 2px solid rgba(59,89,152,0.9); color: rgba(59,89,152,0.9); }
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
@@ -105,8 +104,6 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
-
-
 
 
 <body>
@@ -151,15 +148,10 @@ html, body {
       messageContainer.appendChild(messageDiv);
       chatContainer.appendChild(messageContainer);
 
-      // 停留30秒 → 漸漸淡出10秒 → 保留在 DOM
+      // 停留30秒 → 漸漸淡出10秒 → 保留在 DOM，不刪除舊訊息
       setTimeout(() => {
         messageContainer.classList.add('fadeout');
       }, 30000);
-
-      // 最多保留 50 條訊息 → 超過才移除最舊的
-      while (chatContainer.children.length > 50) {
-        chatContainer.removeChild(chatContainer.firstChild);
-      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -182,4 +174,3 @@ html, body {
   </script>
 </body>
 </html>
-
