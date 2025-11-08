@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +46,7 @@ html, body {
 .message-container.fadeout:hover {
   animation-play-state: paused;
   opacity: 1 !important; /* 滑鼠移上去暫時顯示回來 */
+  transform: scale(1.03); /* hover 時輕微放大 */
 }
 
 /* 動畫 */
@@ -88,12 +90,31 @@ html, body {
   font-size: 0.85em;
   text-shadow: 1px 1px 2px #000;
   overflow: hidden;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 }
 
-.username-box.twitch { border-image: linear-gradient(90deg, #9146FF, #6a30cc) 1; color: #fff; }
-.username-box.youtube { border-image: linear-gradient(90deg, #FF0000, #cc0000) 1; color: #fff; }
-.username-box.kick { border-image: linear-gradient(90deg, #00FF80, #00cc66) 1; color: #000; }
-.username-box.facebook { border-image: linear-gradient(90deg, #3b5998, #2d4373) 1; color: #fff; }
+/* 平台樣式：漸層邊框 */
+.username-box.twitch {
+  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
+                    linear-gradient(90deg, #9146FF, #6a30cc);
+  color: #fff;
+}
+.username-box.youtube {
+  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
+                    linear-gradient(90deg, #FF0000, #cc0000);
+  color: #fff;
+}
+.username-box.kick {
+  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
+                    linear-gradient(90deg, #00FF80, #00cc66);
+  color: #000;
+}
+.username-box.facebook {
+  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
+                    linear-gradient(90deg, #3b5998, #2d4373);
+  color: #fff;
+}
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
@@ -101,7 +122,6 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
-
 
 
 
