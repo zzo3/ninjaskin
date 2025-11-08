@@ -123,7 +123,7 @@ html, body {
   let lastMessageDiv = null;
 
   const urlParams = new URLSearchParams(window.location.search);
-  const roomID = urlParams.get("session") || "7RUWtGBfz2"; // 預設房間 ID，可改成你的
+  const roomID = urlParams.get("session") || "EhdYXAwavc"; // 預設房間 ID，可改成你的
   const password = "false";
   const featuredMode = false;
 
@@ -195,14 +195,6 @@ html, body {
       messageDiv.classList.add('message');
       if (data.type === 'bot') messageDiv.classList.add('bot');
 
-      // 平台 icon
-      let sourceIcon = '';
-      if (data.type && data.type !== 'bot') {
-        const providerName = data.type.charAt(0).toUpperCase() + data.type.slice(1);
-        const iconUrl = `https://socialstream.ninja/sources/images/${data.type}.png`;
-        sourceIcon = `<img src="${iconUrl}" alt="${providerName}" class="source-icon" onerror="this.remove();">`;
-      }
-
       // 徽章
       let chatbadges = "";
       if (data.chatbadges) {
@@ -217,7 +209,6 @@ html, body {
 
       messageDiv.innerHTML = `
         <div class="username-box ${data.type || ''}">
-          ${sourceIcon}
           <span>${data.chatname}</span>
           <span class="badges">${chatbadges}</span>
         </div>
