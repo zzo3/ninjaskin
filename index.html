@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 奢華 Cyan 最終版</title>
+  <title>聊天室浮層 - 藍色火焰主題</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -14,8 +14,16 @@ html, body {
   width: 100%;
   height: 100%;
   font-family: 'Noto Sans TC', sans-serif;
-  background: transparent;
+  /* 背景：藍色火焰漸層 + 流動動畫 */
+  background: linear-gradient(180deg, #000033 0%, #0000FF 30%, #1E90FF 60%, #70C9FB 85%, #FFFFFF 100%);
+  background-size: 100% 200%; /* 讓漸層有足夠空間流動 */
+  animation: flameFlow 20s ease-in-out infinite alternate;
   color: #fff;
+}
+
+@keyframes flameFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 100%; }
 }
 
 #chat-container {
@@ -24,23 +32,32 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 15px; /* 上下左右邊距改為15px */
+  padding: 15px;
   max-width: 400px;
   margin: 0 auto;
   max-height: 100vh;
-  overflow-y: auto; /* 可滾動 */
+  overflow-y: auto;
 }
 
-/* 美化滾輪 */
+/* 美化滾輪：藍色火焰風格 */
 #chat-container::-webkit-scrollbar {
-  width: 6px;
+  width: 3px;
 }
 #chat-container::-webkit-scrollbar-thumb {
-  background: #00ffff;
-  border-radius: 3px;
+  background: linear-gradient(180deg, #0000FF, #1E90FF, #00BFFF);
+  border-radius: 2px;
+}
+#chat-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #1E90FF, #00BFFF, #70C9FB);
 }
 #chat-container::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0,0,50,0.3);
+}
+
+/* Firefox 支援 */
+#chat-container {
+  scrollbar-width: thin;
+  scrollbar-color: #1E90FF rgba(0,0,50,0.3);
 }
 
 .message-container {
@@ -49,13 +66,10 @@ html, body {
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
-
 .message-container.fadeout {
-  animation: floatUpFade 30s linear forwards; /* 30秒後消失 */
+  animation: floatUpFade 30s linear forwards;
   animation-play-state: running;
 }
-
-/* 滑鼠移過去時暫停消失動畫 */
 .message-container.fadeout:hover {
   animation-play-state: paused;
 }
@@ -64,7 +78,6 @@ html, body {
   from { opacity: 0; transform: translateY(6px) scale(0.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 @keyframes floatUpFade {
   from { transform: translateY(0) scale(1); opacity: 1; }
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
@@ -75,53 +88,49 @@ html, body {
   position: relative;
   display: inline-block;
   max-width: 100%;
-  background: rgba(0,0,0,0.1);
-  padding: 8px; /* 內距全改為8px */
+  background: rgba(0,0,50,0.1);
+  padding: 8px;
   border-radius: 8px;
   color: #fff;
   word-wrap: break-word;
-  border: 1px solid #00ffff;
-  box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+  border: 1px solid #1E90FF;
+  box-shadow: 0 0 6px #1E90FF, 0 0 12px #00BFFF;
   font-size: 0.72em;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
+  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(173,216,230,0.8);
   transition: box-shadow 0.3s ease, background 0.3s ease;
   animation: softPulse 4s infinite;
 }
-
-/* 滑鼠移過去時光暈加強 + 透明度改成20% */
 .message:hover {
-  box-shadow: 0 0 14px #00ffff, 0 0 28px #00ffff;
-  background: rgba(0,0,0,0.2); /* 透明度改成20% */
+  box-shadow: 0 0 14px #00BFFF, 0 0 28px #70C9FB;
+  background: rgba(0,0,50,0.2);
 }
-
 @keyframes softPulse {
-  0%, 100% { box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff; }
-  50% { box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff; }
+  0%, 100% { box-shadow: 0 0 6px #1E90FF, 0 0 12px #00BFFF; }
+  50% { box-shadow: 0 0 10px #00BFFF, 0 0 20px #70C9FB; }
 }
 
 /* BOT 訊息 */
 .message.bot {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0,0,50,0.1);
   border: 1px solid #444;
   box-shadow: none;
-  color: #ccc;
+  color: #aaa;
 }
 
 /* 特別事件 */
 .message.highlight {
-  background: rgba(0,0,0,0.1);
-  border: 1px solid #ffd700;
-  box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700;
-  color: #ffd700;
+  background: rgba(0,0,50,0.1);
+  border: 1px solid #70C9FB;
+  box-shadow: 0 0 8px #00BFFF, 0 0 16px #70C9FB;
+  color: #70C9FB;
   animation: glowPulse 2s infinite;
 }
-
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; }
-  50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
+  0%, 100% { box-shadow: 0 0 8px #00BFFF, 0 0 16px #70C9FB; }
+  50% { box-shadow: 0 0 12px #70C9FB, 0 0 24px #ADD8E6; }
 }
 
-/* 名稱框：外部左上角，字體加大10% */
+/* 名稱框 */
 .username-box {
   position: absolute;
   top: -22px;
@@ -130,43 +139,20 @@ html, body {
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,0,0.1);
-  border: 1px solid #f5d76e;
-  color: #f5d76e;
-  font-size: 0.8em; /* 字體加大10% */
-  text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
-  box-shadow: 0 0 5px #f5d76e, 0 0 10px #f5d76e;
-}
-
-.username-box.twitch {
-  border: 1px solid #9146FF;
-  box-shadow: 0 0 5px #9146FF, 0 0 10px #9146FF;
-  color:#9146FF;
-}
-.username-box.youtube {
-  border: 1px solid #FF0000;
-  box-shadow: 0 0 5px #FF0000, 0 0 10px #FF0000;
-  color:#FF0000;
-}
-.username-box.kick {
-  border: 1px solid #00FF80;
-  box-shadow: 0 0 5px #00FF80, 0 0 10px #00FF80;
-  color:#00FF80;
-}
-.username-box.facebook {
-  border: 1px solid #3b5998;
-  box-shadow: 0 0 5px #3b5998, 0 0 10px #3b5998;
-  color:#3b5998;
+  background: rgba(0,0,50,0.1);
+  border: 1px solid #00BFFF;
+  color: #00BFFF;
+  font-size: 0.8em;
+  text-shadow: 1px 1px 2px #000, 0 0 6px #70C9FB;
+  box-shadow: 0 0 5px #1E90FF, 0 0 10px #00BFFF;
 }
 
 .text { line-height: 1.4; word-break: break-word; }
-.donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
+.donation { padding: 5px 10px; color: #70C9FB; font-weight: bold; font-size: 0.72em; }
 .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
 .badges { margin-left: 6px; }
   </style>
 </head>
-
-
 
 
 
