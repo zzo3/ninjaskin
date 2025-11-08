@@ -47,6 +47,7 @@ html, body {
   animation-play-state: paused;
   opacity: 1 !important;
   transform: scale(1.03);
+  color: #fff !important; /* hover 恢復亮度 */
 }
 
 /* 動畫 */
@@ -86,17 +87,23 @@ html, body {
   border-radius: 10px;
   font-weight: 600;
   z-index: 2;
-  background: transparent; /* 無背景 */
+  background: transparent;
   font-size: 0.85em;
   text-shadow: 1px 1px 2px #000;
   opacity: 0.9; /* 字體透明度 */
 }
 
-/* 平台樣式：邊框顏色透明度0.9 */
-.username-box.twitch { border: 2px solid rgba(145,70,255,0.9); color: rgba(145,70,255,0.9); }
-.username-box.youtube { border: 2px solid rgba(255,0,0,0.9); color: rgba(255,0,0,0.9); }
-.username-box.kick { border: 2px solid rgba(0,255,128,0.9); color: rgba(0,255,128,0.9); }
-.username-box.facebook { border: 2px solid rgba(59,89,152,0.9); color: rgba(59,89,152,0.9); }
+/* 平台樣式：邊框顏色透明度0.9 + 光暈 */
+.username-box.twitch { border: 2px solid rgba(145,70,255,0.9); color: rgba(145,70,255,0.9); box-shadow: 0 0 6px rgba(145,70,255,0.9); }
+.username-box.youtube { border: 2px solid rgba(255,0,0,0.9); color: rgba(255,0,0,0.9); box-shadow: 0 0 6px rgba(255,0,0,0.9); }
+.username-box.kick { border: 2px solid rgba(0,255,128,0.9); color: rgba(0,255,128,0.9); box-shadow: 0 0 6px rgba(0,255,128,0.9); }
+.username-box.facebook { border: 2px solid rgba(59,89,152,0.9); color: rgba(59,89,152,0.9); box-shadow: 0 0 6px rgba(59,89,152,0.9); }
+
+/* Bot 名稱框：無光暈 */
+.username-box.bot { box-shadow: none; }
+
+/* 特別事件：更亮邊框 + 強光暈 */
+.username-box.highlight { border-width: 2px; box-shadow: 0 0 10px currentColor, 0 0 20px currentColor; }
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
@@ -104,6 +111,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 <body>
@@ -134,10 +142,19 @@ html, body {
         else if (type.includes("youtube")) platformClass = "youtube";
         else if (type.includes("kick")) platformClass = "kick";
         else if (type.includes("facebook")) platformClass = "facebook";
+        else if (type.includes("bot")) platformClass = "bot";
+      }
+
+      let extraClass = "";
+      if (data.event) {
+        const specialEvents = ["subscriber","gifted","bits","combo","gift","loyalty","donation","follower"];
+        if (specialEvents.some(ev => data.event.toLowerCase().includes(ev))) {
+          extraClass = "highlight";
+        }
       }
 
       messageDiv.innerHTML = `
-        <div class="username-box ${platformClass}">
+        <div class="username-box ${platformClass} ${extraClass}">
           <span>${data.chatname || ''}</span>
           <span class="badges"></span>
         </div>
