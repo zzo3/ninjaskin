@@ -33,7 +33,7 @@ html, body {
 
 .message-container {
   position: relative;
-  margin-bottom: 6px;
+  margin-bottom: 28px; /* 預留名稱框在外部的空間 */
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
@@ -58,8 +58,7 @@ html, body {
   display: inline-block;
   max-width: 100%;
   background: rgba(0,0,0,0.1);
-  padding: 26px 8px 8px 8px; /* 預留名稱框高度 */
-  margin-top: 16px;
+  padding: 10px 8px 8px 8px; /* 正常內距 */
   border-radius: 8px;
   color: #fff;
   word-wrap: break-word;
@@ -88,19 +87,13 @@ html, body {
   color: #ccc;
 }
 
-/* 特別事件：進場爆亮 + pulse */
+/* 特別事件：完整 pulse */
 .message.highlight {
   background: rgba(0,0,0,0.1);
   border: 1px solid #ffd700;
   box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700;
   color: #ffd700;
-  animation: flashIn 0.6s ease-out, glowPulse 2s infinite 0.6s;
-}
-
-@keyframes flashIn {
-  0% { box-shadow: 0 0 0px #ffd700, 0 0 0px #ffd700; opacity: 0; }
-  50% { box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700; opacity: 1; }
-  100% { box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; opacity: 1; }
+  animation: glowPulse 2s infinite;
 }
 
 @keyframes glowPulse {
@@ -108,12 +101,11 @@ html, body {
   50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
-/* 名稱框：在訊息框外，貼齊左上角，有 glow 不閃爍 */
+/* 名稱框：在訊息框外部左上角，有 glow 不閃爍 */
 .username-box {
   position: absolute;
-  top: -100%;
-  left: 0;
-  transform: translateY(-4px);
+  top: -22px;   /* 移到訊息框外部上方 */
+  left: 0;      /* 貼齊訊息框左邊 */
   padding: 3px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -153,6 +145,9 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
+
+
 
 <body>
   <div id="chat-container"></div>
