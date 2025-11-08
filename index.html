@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層</title>
+  <title>聊天室浮層 - 黑金風格</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
     body, html {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      font-family: 'Press Start 2P', cursive;
-      background: rgba(0, 0, 0, 0.2); /* 背景透明度 20% */
-      color: #fff;
+      font-family: 'Noto Sans TC', sans-serif;
+      background: rgba(0, 0, 0, 0.2); /* 黑色背景透明度 20% */
+      color: #f5d76e; /* 金色字體 */
     }
 
     .message-container {
@@ -34,72 +34,76 @@
       transition: opacity 0.5s ease, transform 0.5s ease;
     }
 
+    /* 使用者名稱框：黑金霓虹 */
     .username-box {
       display: flex;
       position: absolute;
       top: -19px;
       left: 0px;
       padding: 8px 15px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: 600;
       z-index: 2;
-      text-shadow: 0 0 6px rgba(255,255,255,0.8);
-      border: 2px solid #fff;
-    }
-    .username-box.twitch {
-      background: rgba(145, 70, 255, 0.2);
-      border-color: #9146FF;
-      box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
-      color: #fff;
-    }
-    .username-box.kick {
-      background: rgba(0, 255, 128, 0.2);
-      border-color: #00FF80;
-      box-shadow: 0 0 10px #00FF80, 0 0 20px #00FF80;
-      color: #fff;
-    }
-    .username-box.youtube {
-      background: rgba(255, 0, 0, 0.2);
-      border-color: #FF0000;
-      box-shadow: 0 0 10px #FF0000, 0 0 20px #FF0000;
-      color: #fff;
-    }
-    .username-box.facebook {
-      background: rgba(59, 89, 152, 0.2);
-      border-color: #3b5998;
-      box-shadow: 0 0 10px #3b5998, 0 0 20px #3b5998;
-      color: #fff;
+      color: #f5d76e;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid #f5d76e;
+      text-shadow: 0 0 6px #f5d76e, 0 0 12px #f5d76e;
+      box-shadow: 0 0 10px #f5d76e, 0 0 20px #f5d76e;
+      font-size: 0.8em; /* 比原本小 20% */
     }
 
+    /* 不同平台霓虹色 */
+    .username-box.twitch {
+      border-color: #9146FF;
+      box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
+    }
+    .username-box.youtube {
+      border-color: #FF0000;
+      box-shadow: 0 0 10px #FF0000, 0 0 20px #FF0000;
+    }
+    .username-box.kick {
+      border-color: #00FF80;
+      box-shadow: 0 0 10px #00FF80, 0 0 20px #00FF80;
+    }
+    .username-box.facebook {
+      border-color: #3b5998;
+      box-shadow: 0 0 10px #3b5998, 0 0 20px #3b5998;
+    }
+
+    /* 訊息框：黑底金邊霓虹 */
     .message {
       display: inline-block;
       max-height: 150px;
       max-width: 100%;
-      background: rgba(25, 25, 25, 0.2);
+      background: rgba(0, 0, 0, 0.6);
       padding: 24px 18px 18px 18px;
       margin-top: 22px;
       margin-left: 15px;
-      border-radius: 6px;
-      color: #fff;
+      border-radius: 8px;
+      color: #f5d76e;
       position: relative;
       word-wrap: break-word;
-      border: 2px solid #0ff;
-      box-shadow: 0 0 8px #0ff, 0 0 16px #0ff;
-      font-family: 'Press Start 2P', cursive;
+      border: 2px solid #f5d76e;
+      box-shadow: 0 0 8px #f5d76e, 0 0 16px #f5d76e;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.8em; /* 比原本小 20% */
     }
 
     .text {
-      font-size: clamp(0.85em, 2.5vw, 1em);
+      font-size: clamp(0.68em, 2vw, 0.8em);
       line-height: 1.4;
       word-break: break-word;
-      text-shadow: 0 0 6px rgba(255,255,255,0.8);
+      text-shadow: 0 0 6px #f5d76e, 0 0 12px #f5d76e;
+      font-family: 'Noto Sans TC', sans-serif;
     }
 
     .donation {
       padding: 7px 18px 5px 18px;
-      color: #ffea00;
-      text-shadow: 0 0 6px #ffea00, 0 0 12px #ffea00;
+      color: #ffd700; /* 更亮的金色 */
+      text-shadow: 0 0 6px #ffd700, 0 0 12px #ffd700;
       font-weight: bold;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.8em;
     }
 
     .badge {
@@ -129,17 +133,29 @@
   <div id="chat-container"></div>
 
   <script>
+    var urlParams = new URLSearchParams(window.location.search);
+    var roomID = "4DP7Stjuew"; 
+    if (urlParams.has("session")) {
+      roomID = urlParams.get("session");
+    }
+    var password = "false"; 
+    var featuredMode = false; 
+
     const chatContainer = document.getElementById('chat-container');
-    const SHOWTIME = 30000; // 測試訊息顯示 30 秒
+    const SHOWTIME = (() => {
+      const v = parseInt(urlParams.get('showtime') || '30000');
+      return isNaN(v) ? 30000 : v;
+    })();
 
     function addMessageToOverlay(data) {
-      if (!data.chatname) return;
+      if (!data.chatname && data.meta) return;
 
       const messageContainer = document.createElement('div');
       messageContainer.classList.add('message-container');
       
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
+      if (data.mid) messageDiv.id = data.mid;
 
       let platformClass = "";
       if (data.type) {
@@ -157,6 +173,7 @@
           <span class="badges"></span>
         </div>
         <div class="text">${data.chatmessage || ''}</div>
+        ${(data.donation||data.hasDonation) ? `<div class="donation">${(data.donation||data.hasDonation)}</div>` : ''}
       `;
 
       messageContainer.appendChild(messageDiv);
@@ -179,27 +196,21 @@
       }
     }
 
-    // 測試訊息模擬程式碼
-    document.addEventListener("DOMContentLoaded", () => {
-      addMessageToOverlay({
-        chatname: "Twitch用戶",
-        chatmessage: "這是一則來自 Twitch 的測試訊息 🎮",
-        type: "twitch",
-        chatimg: "https://static-cdn.jtvnw.net/jtv_user_pictures/x.png"
-      });
+    // 初始化 Social Stream Ninja iframe
+    document.addEventListener('DOMContentLoaded', () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = featuredMode
+        ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+        : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
 
-      addMessageToOverlay({
-        chatname: "YouTube用戶",
-        chatmessage: "這是一則來自 YouTube 的測試訊息 ▶️",
-        type: "youtube",
-        chatimg: "https://yt3.ggpht.com/ytc/AKedOLQ.png"
-      });
+      iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
+      document.body.appendChild(iframe);
 
-      addMessageToOverlay({
-        chatname: "Kick用戶",
-        chatmessage: "這是一則來自 Kick 的測試訊息 💚",
-        type: "kick",
-        chatimg: "https://kick.com/favicon.ico"
+      window.addEventListener("message", (event) => {
+        if (event.source !== iframe.contentWindow) return;
+        if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
+          addMessageToOverlay(event.data.dataReceived.overlayNinja);
+        }
       });
     });
   </script>
