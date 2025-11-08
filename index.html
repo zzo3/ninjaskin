@@ -115,193 +115,173 @@ html, body {
 
 
 <body>
-  <!-- 頁面切換選單 -->
-  <div style="position:fixed; top:10px; left:10px; z-index:3000;">
-    <button onclick="showPage('chat')" style="padding:6px 12px; margin-right:5px;">訊息</button>
-    <button onclick="showPage('announcement')" style="padding:6px 12px;">公告管理</button>
-  </div>
+  <div id="chat-container"></div>
 
-  <!-- 訊息頁面 (預設顯示) -->
-  <div id="chatPage" style="display:block;">
-    <div id="chat-container"></div>
-  </div>
+<script>
+  const chatContainer = document.getElementById('chat-container');
+  let lastSender = null;
+  let lastMessageDiv = null;
 
-  <!-- 公告管理頁面 (預設隱藏) -->
-  <div id="announcementPage" style="display:none; background:#222; color:#fff; padding:10px; border-radius:8px; width:360px; position:fixed; top:50px; right:10px; z-index:2000;">
-    <h3>公告管理</h3>
-    <button onclick="toggleAnnouncement(true)" style="padding:6px 12px; margin-right:5px;">開啟公告</button>
-    <button onclick="toggleAnnouncement(false)" style="padding:6px 12px;">關閉公告</button>
-    <br><br>
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomID = urlParams.get("session") || "7RUWtGBfz2"; // 預設房間 ID，可改成你的
+  const password = "false";
+  const featuredMode = false;
 
-    <label>選擇公告：</label>
-    <select id="announcementSelect" style="width:100%; margin-bottom:8px;"></select>
-    <button onclick="sendSelectedAnnouncement()" style="padding:6px 12px; width:100%; margin-bottom:10px;">立即推送</button>
+  function applyOverlaySize() {
+    const size = urlParams.get('size');
+    document.body.classList.remove("small-overlay", "large-overlay");
+    if (size === "small") document.body.classList.add("small-overlay");
+    else if (size === "large") document.body.classList.add("large-overlay");
+  }
 
-    <label>文字：</label><br>
-    <input id="msgText" type="text" style="width:100%;"><br>
-    <label>顏色 (Hex)：</label><br>
-    <input id="msgColor" type="text" value="#00ffff" style="width:100%;"><br>
-    <label>光暈：</label>
-    <input id="msgGlow" type="checkbox" checked><br>
-    <label>間隔 (毫秒)：</label><br>
-    <input id="msgInterval" type="number" value="300000" style="width:100%;"><br><br>
+  function isFullyVisible(element) {
+    const containerRect = chatContainer.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    return elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
+  }
 
-    <!-- 三個平排按鈕 -->
-    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-      <button onclick="addAnnouncement()" style="flex:1; margin-right:5px; padding:6px;">新增</button>
-      <button onclick="updateAnnouncement()" style="flex:1; margin-right:5px; padding:6px;">修改</button>
-      <button onclick="deleteAnnouncement()" style="flex:1; padding:6px;">刪除</button>
-    </div>
+  function removeCutOffMessages() {
+    let firstMessage = chatContainer.firstElementChild;
+    while (firstMessage && !isFullyVisible(firstMessage)) {
+      chatContainer.removeChild(firstMessage);
+      firstMessage = chatContainer.firstElementChild;
+    }
+  }
 
-    <h4>公告列表</h4>
-    <div id="announcementList" style="max-height:220px; overflow-y:auto; background:#333; padding:5px; border-radius:5px;"></div>
-  </div>
+  function autoScroll() {
+    const lastMessage = chatContainer.lastElementChild;
+    if (lastMessage) {
+      lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
+      setTimeout(() => {
+        lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
+        removeCutOffMessages();
+      }, 50);
+    }
+  }
 
-  <script>
-    /* ========= 切換頁面 ========= */
-    function showPage(page) {
-      document.getElementById("chatPage").style.display = (page === "chat") ? "block" : "none";
-      document.getElementById("announcementPage").style.display = (page === "announcement") ? "block" : "none";
+  const observer = new MutationObserver(autoScroll);
+  observer.observe(chatContainer, { childList: true, subtree: true });
+
+  // 事件訊息
+  function addEventToOverlay(data) {
+    const eventDiv = document.createElement('div');
+    eventDiv.classList.add('event-message');
+    let eventText = '';
+    if (data.type === 'follow') eventText = `${data.chatname} just followed!`;
+    else if (data.type === 'subscription') eventText = `${data.chatname} subscribed!`;
+    else if (data.type === 'donation') eventText = `${data.chatname} donated ${data.amount || ''}!`;
+    eventDiv.innerHTML = `<span>🎉 ${eventText} 🎉</span>`;
+    chatContainer.appendChild(eventDiv);
+  }
+
+  // 聊天訊息
+  function addMessageToOverlay(data) {
+    if (!data || !data.chatname || !data.chatmessage) return;
+    if (['follow','subscription','donation'].includes(data.type)) {
+      addEventToOverlay(data);
+      return;
     }
 
-    /* ========= 公告邏輯 ========= */
-    let scheduledMessages = [
-      { text: "歡迎來到直播間！", color: "#00ffff", glow: true, interval: 300000 },
-      { text: "記得訂閱和按讚支持～", color: "#ff0000", glow: true, interval: 600000 },
-      { text: "加入會員享受更多福利！", color: "#00ff80", glow: false, interval: 900000 }
-    ];
-    let autoAnnouncement = true;
-    const maxMessages = 50;
-
-    function toggleAnnouncement(on) { autoAnnouncement = on; }
-
-    function sendAnnouncementNow(index = 0) {
-      if (index < 0 || index >= scheduledMessages.length) index = 0;
-      const msg = scheduledMessages[index];
-      addMessageToOverlay({
-        chatname: "系統公告",
-        chatmessage: msg.text,
-        type: "bot",
-        color: msg.color,
-        glow: msg.glow
-      });
-    }
-
-    function sendSelectedAnnouncement() {
-      const idx = document.getElementById("announcementSelect").value;
-      sendAnnouncementNow(parseInt(idx));
-    }
-
-    function updateAnnouncement() {
-      const idx = document.getElementById("announcementSelect").value;
-      scheduledMessages[idx] = {
-        text: document.getElementById("msgText").value,
-        color: document.getElementById("msgColor").value,
-        glow: document.getElementById("msgGlow").checked,
-        interval: parseInt(document.getElementById("msgInterval").value)
-      };
-      refreshAnnouncementSelect();
-    }
-
-    function addAnnouncement() {
-      scheduledMessages.push({
-        text: document.getElementById("msgText").value,
-        color: document.getElementById("msgColor").value,
-        glow: document.getElementById("msgGlow").checked,
-        interval: parseInt(document.getElementById("msgInterval").value)
-      });
-      refreshAnnouncementSelect();
-    }
-
-    function deleteAnnouncement() {
-      const idx = document.getElementById("announcementSelect").value;
-      if (scheduledMessages.length > 0) {
-        scheduledMessages.splice(idx, 1);
-        refreshAnnouncementSelect();
-      }
-    }
-
-    function deleteAnnouncementFromList(idx) {
-      scheduledMessages.splice(idx, 1);
-      refreshAnnouncementSelect();
-    }
-
-    function pushAnnouncementFromList(idx) {
-      sendAnnouncementNow(idx);
-    }
-
-    function refreshAnnouncementSelect() {
-      const select = document.getElementById("announcementSelect");
-      select.innerHTML = "";
-      scheduledMessages.forEach((msg, idx) => {
-        const option = document.createElement("option");
-        option.value = idx;
-        option.text = `${idx+1}. ${msg.text}`;
-        select.appendChild(option);
-      });
-      refreshAnnouncementList();
-    }
-
-    function refreshAnnouncementList() {
-      const list = document.getElementById("announcementList");
-      list.innerHTML = "";
-      scheduledMessages.forEach((msg, idx) => {
-        const item = document.createElement("div");
-        item.style.marginBottom = "8px";
-        item.style.padding = "5px";
-        item.style.borderBottom = "1px solid #555";
-        item.innerHTML = `
-          <strong>${idx+1}.</strong> ${msg.text} 
-          <br><span style="color:${msg.color};">顏色: ${msg.color}</span> 
-          | 光暈: ${msg.glow ? "是" : "否"} 
-          | 間隔: ${msg.interval}ms
-          <br>
-          <button onclick="pushAnnouncementFromList(${idx})" style="margin-top:5px; padding:4px 8px; margin-right:5px;">立即推送</button>
-          <button onclick="deleteAnnouncementFromList(${idx})" style="margin-top:5px; padding:4px 8px;">刪除</button>
-        `;
-        list.appendChild(item);
-      });
-    }
-
-    /* ========= 訊息顯示邏輯 ========= */
-    const chatContainer = document.getElementById('chat-container');
-
-    function addMessageToOverlay(data) {
+    if (lastSender === data.chatname && lastMessageDiv) {
+      const textDiv = document.createElement('div');
+      textDiv.classList.add('text');
+      textDiv.innerHTML = data.chatmessage;
+      lastMessageDiv.querySelector('.message').appendChild(textDiv);
+    } else {
       const messageContainer = document.createElement('div');
       messageContainer.classList.add('message-container');
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
+      if (data.type === 'bot') messageDiv.classList.add('bot');
+
+      // 平台 icon
+      let sourceIcon = '';
+      if (data.type && data.type !== 'bot') {
+        const providerName = data.type.charAt(0).toUpperCase() + data.type.slice(1);
+        const iconUrl = `https://socialstream.ninja/sources/images/${data.type}.png`;
+        sourceIcon = `<img src="${iconUrl}" alt="${providerName}" class="source-icon" onerror="this.remove();">`;
+      }
+
+      // 徽章
+      let chatbadges = "";
+      if (data.chatbadges) {
+        data.chatbadges.slice(0, 1).forEach(badge => {
+          if (badge.type === "img" && badge.src) {
+            chatbadges += `<img class='badge' src='${badge.src}' />`;
+          } else if (badge.type === "svg" && badge.html) {
+            chatbadges += `<span class='badge svg'>${badge.html}</span>`;
+          }
+        });
+      }
 
       messageDiv.innerHTML = `
-        <div class="username-box bot">
-          <span>${data.chatname || ''}</span>
+        <div class="username-box ${data.type || ''}">
+          ${sourceIcon}
+          <span>${data.chatname}</span>
+          <span class="badges">${chatbadges}</span>
         </div>
-        <div class="text">${data.chatmessage || ''}</div>
+        <div class="text">${data.chatmessage}</div>
       `;
-
-      if (data.type === "bot" && data.chatname === "系統公告") {
-        messageDiv.style.borderColor = data.color || "#ffffff";
-        messageDiv.style.color = data.color || "#ffffff";
-        if (data.glow) {
-          messageDiv.style.boxShadow = `0 0 8px ${data.color}, 0 0 16px ${data.color}`;
-        }
-      }
 
       messageContainer.appendChild(messageDiv);
       chatContainer.appendChild(messageContainer);
 
-      setTimeout(() => { messageContainer.classList.add('fadeout'); }, 30000);
-
-      while (chatContainer.children.length > maxMessages) {
-        chatContainer.removeChild(chatContainer.firstChild);
-      }
+      lastSender = data.chatname;
+      lastMessageDiv = messageContainer;
     }
+  }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // 預設顯示訊息頁面
-      showPage("chat");
-      refreshAnnouncementSelect();
+  // iframe 連接 Social Stream Ninja
+  const iframe = document.createElement("iframe");
+  iframe.src = featuredMode
+    ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+    : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+  iframe.style.cssText = "width:0;height:0;position:fixed;left:-100px;top:-100px;";
+  document.body.appendChild(iframe);
 
-      // 啟動自動公告
-      scheduledMessages.for
+  window.addEventListener("message", (event) => {
+    if (event.source !== iframe.contentWindow) return;
+    if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
+      addMessageToOverlay(event.data.dataReceived.overlayNinja);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', applyOverlaySize);
+
+  // WebSocket 連接
+  let conCon = 1;
+  let socketserver = false;
+  let serverURL = urlParams.has("localserver") ? "ws://127.0.0.1:3000" : "wss://io.socialstream.ninja";
+
+  function setupSocket() {
+    socketserver.onclose = function () {
+      setTimeout(function () {
+        conCon += 1;
+        socketserver = new WebSocket(serverURL);
+        setupSocket();
+      }, 100 * conCon);
+    };
+    socketserver.onopen = function () {
+      conCon = 1;
+      socketserver.send(JSON.stringify({ "join": roomID, "out": 3, "in": 4 }));
+    };
+    socketserver.addEventListener('message', function (event) {
+      if (event.data) {
+        const data = JSON.parse(event.data);
+        addMessageToOverlay(data);
+        if (data.get) {
+          socketserver.send(JSON.stringify({ callback: { get: data.get, result: true } }));
+        }
+      }
+    });
+  }
+
+  if (urlParams.has("server") || urlParams.has("server2")) {
+    serverURL = urlParams.get("server") || urlParams.get("server2") || serverURL;
+    socketserver = new WebSocket(serverURL);
+    setupSocket();
+  }
+</script>
+</body>
+</html>
