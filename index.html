@@ -31,40 +31,39 @@ html, body {
   overflow-y: auto;
 }
 
-/* 美化滾輪：支援 Chrome / Brave / Edge (WebKit) */
+/* 美化滾輪：支援 Chrome / Brave / Edge */
 #chat-container::-webkit-scrollbar {
-  width: 3px;
+  width: 8px; /* 加粗避免顯示灰色 */
 }
 #chat-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, rgba(0,255,255,0.8), rgba(0,224,224,0.6));
-  border-radius: 2px;
+  background: linear-gradient(to bottom, #00ffff, #00e0e0);
+  border-radius: 4px;
 }
 #chat-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, rgba(0,255,255,1), rgba(0,224,224,0.8));
+  background: linear-gradient(to bottom, #00e0e0, #00cccc);
 }
 #chat-container::-webkit-scrollbar-track {
-  background: rgba(0,255,255,0.1);
+  background: rgba(0,255,255,0.15);
 }
 
 /* Firefox 支援 */
 #chat-container {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0,255,255,0.8) rgba(0,255,255,0.1);
+  scrollbar-color: #00ffff rgba(0,255,255,0.15);
 }
 
 .message-container {
   position: relative;
-  margin-bottom: 30px; /* 原本28px → 現在30px */
+  margin-bottom: 32px; /* 原本30px → 現在32px，多留2px */
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
 
 .message-container.fadeout {
-  animation: floatUpFade 30s ease-out forwards; /* linear → ease-out */
+  animation: floatUpFade 30s ease-out forwards;
   animation-play-state: running;
 }
 
-/* 滑鼠移過去時暫停消失動畫 */
 .message-container.fadeout:hover {
   animation-play-state: paused;
 }
@@ -91,13 +90,12 @@ html, body {
   word-wrap: break-word;
   border: 1px solid #00ffff;
   box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
-  font-size: 0.85em; /* 字體稍微放大 */
+  font-size: 0.85em;
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
   transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
   animation: softPulse 4s infinite;
 }
 
-/* 3. 強化 hover 效果：加上縮放 */
 .message:hover {
   box-shadow: 0 0 14px #00ffff, 0 0 28px #00ffff;
   background: rgba(0,0,0,0.2);
@@ -131,10 +129,10 @@ html, body {
   50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
-/* 名稱框：外部左上角，字體加大10%，與訊息框留2px */
+/* 名稱框：與訊息框留2px空間 */
 .username-box {
   position: absolute;
-  top: -24px; /* 原本-22px → 現在-24px */
+  top: -26px; /* 原本-24px → 現在-26px，多留2px */
   left: 0;
   padding: 3px 6px;
   border-radius: 4px;
@@ -148,7 +146,7 @@ html, body {
   box-shadow: 0 0 5px #f5d76e, 0 0 10px #f5d76e;
 }
 
-/* 6. 名稱框更突出：漸層邊框 */
+/* 名稱框漸層邊框 */
 .username-box.twitch {
   border: 1px solid transparent;
   border-image: linear-gradient(90deg, #9146FF, #6a30cc) 1;
@@ -180,6 +178,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
