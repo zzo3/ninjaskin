@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 藍色火焰訊息框</title>
+  <title>聊天室浮層 - 黑底火焰邊框</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -28,28 +28,7 @@ html, body {
   max-width: 400px;
   margin: 0 auto;
   max-height: 100vh;
-  overflow-y: auto;
-}
-
-/* 美化滾輪：藍色火焰風格 */
-#chat-container::-webkit-scrollbar {
-  width: 3px;
-}
-#chat-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #0000FF, #1E90FF, #00BFFF);
-  border-radius: 2px;
-}
-#chat-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #1E90FF, #00BFFF, #70C9FB);
-}
-#chat-container::-webkit-scrollbar-track {
-  background: rgba(0,0,50,0.3);
-}
-
-/* Firefox 支援 */
-#chat-container {
-  scrollbar-width: thin;
-  scrollbar-color: #1E90FF rgba(0,0,50,0.3);
+  overflow-y: hidden; /* 不顯示滾動條 */
 }
 
 .message-container {
@@ -75,40 +54,34 @@ html, body {
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
 }
 
-/* 一般訊息：內部火焰流動 + 邊框火焰流動 */
+/* 一般訊息：黑底 + 流動火焰邊框 */
 .message {
   position: relative;
   display: inline-block;
   max-width: 100%;
-  background: linear-gradient(180deg, #000033 0%, #0000FF 30%, #1E90FF 60%, #70C9FB 85%, #FFFFFF 100%);
-  background-size: 100% 200%;
-  animation: flameFlow 20s ease-in-out infinite alternate;
+  background: rgba(0,0,0,1); /* 全黑 */
   padding: 8px;
   border-radius: 8px;
-  color: #fff;
+  color: rgba(255,255,255,0.9); /* 文字90%不透明度 */
   word-wrap: break-word;
-  border: 3px solid transparent;
+  border: 6px solid transparent; /* 邊框加粗20% (原3px → 6px) */
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;
   background-image: 
-    linear-gradient(180deg, #000033 0%, #0000FF 30%, #1E90FF 60%, #70C9FB 85%, #FFFFFF 100%),
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)), 
     linear-gradient(270deg, #0000FF, #1E90FF, #00BFFF, #70C9FB);
-  background-size: 100% 200%, 400% 400%;
-  animation: flameFlow 20s ease-in-out infinite alternate, borderFlame 8s linear infinite;
+  background-size: 100% 100%, 400% 400%;
+  animation: borderFlame 8s linear infinite;
   font-size: 0.72em;
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(173,216,230,0.8);
   transition: opacity 0.3s ease, box-shadow 0.3s ease;
-  opacity: 0.1;
+  opacity: 0.1; /* 預設透明度10% */
 }
 .message:hover {
-  opacity: 0.2;
+  opacity: 0.2; /* 滑鼠移過去透明度20% */
   box-shadow: 0 0 14px #00BFFF, 0 0 28px #70C9FB;
 }
 
-@keyframes flameFlow {
-  0% { background-position: 0% 0%, 0% 50%; }
-  100% { background-position: 0% 100%, 100% 50%; }
-}
 @keyframes borderFlame {
   0% { background-position: 0% 50%, 0% 50%; }
   100% { background-position: 0% 50%, 100% 50%; }
@@ -116,10 +89,16 @@ html, body {
 
 /* BOT 訊息 */
 .message.bot {
-  background: rgba(0,0,50,0.1);
-  border: 1px solid #444;
-  box-shadow: none;
-  color: #aaa;
+  background: rgba(0,0,0,1);
+  border: 6px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image: 
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)), 
+    linear-gradient(270deg, #0000FF, #1E90FF, #00BFFF, #70C9FB);
+  background-size: 100% 100%, 400% 400%;
+  animation: borderFlame 8s linear infinite;
+  color: rgba(200,200,200,0.9);
   opacity: 0.1;
 }
 .message.bot:hover {
@@ -128,18 +107,16 @@ html, body {
 
 /* 特別事件 */
 .message.highlight {
-  background: linear-gradient(180deg, #0000FF, #1E90FF, #70C9FB);
-  background-size: 100% 200%;
-  animation: flameFlow 15s ease-in-out infinite alternate, glowPulse 2s infinite, borderFlame 8s linear infinite;
-  border: 3px solid transparent;
+  background: rgba(0,0,0,1);
+  border: 6px solid transparent;
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;
   background-image: 
-    linear-gradient(180deg, #0000FF, #1E90FF, #70C9FB),
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)), 
     linear-gradient(270deg, #0000FF, #1E90FF, #00BFFF, #70C9FB);
-  background-size: 100% 200%, 400% 400%;
-  box-shadow: 0 0 8px #00BFFF, 0 0 16px #70C9FB;
-  color: #70C9FB;
+  background-size: 100% 100%, 400% 400%;
+  animation: borderFlame 6s linear infinite, glowPulse 2s infinite;
+  color: rgba(112,201,251,0.9);
   opacity: 0.1;
 }
 .message.highlight:hover {
@@ -160,7 +137,7 @@ html, body {
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,50,0.1);
+  background: rgba(0,0,0,0.8);
   border: 1px solid #00BFFF;
   color: #00BFFF;
   font-size: 0.8em;
@@ -169,7 +146,7 @@ html, body {
 }
 
 .text { line-height: 1.4; word-break: break-word; }
-.donation { padding: 5px 10px; color: #70C9FB; font-weight: bold; font-size: 0.72em; }
+.donation { padding: 5px 10px; color: rgba(112,201,251,0.9); font-weight: bold; font-size: 0.72em; }
 .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
 .badges { margin-left: 6px; }
   </style>
