@@ -22,7 +22,7 @@ body, html {
   display: flex;
   flex-direction: column;
   justify-content: flex-end; /* 新訊息由下往上 */
-  padding: 0 10px; /* 左右增加 10px 距離 */
+  padding: 0 15px; /* 左右增加 15px 距離 */
   max-width: 400px;
   margin: auto;
   max-height: 100vh;
@@ -34,7 +34,7 @@ body, html {
 
 .message-container {
   position: relative;
-  margin-bottom: 5px; /* 原本 12px → 6px → 再縮小 20% ≈ 5px */
+  margin-bottom: 5px; /* 間距縮小 */
   will-change: opacity, transform;
 }
 .message-container.visible {
@@ -57,7 +57,7 @@ body, html {
 .message {
   display: inline-block;
   max-width: 100%;
-  background: linear-gradient(145deg, rgba(0,255,255,0.2), rgba(0,255,255,0.5)); /* 更透明 10% */
+  background: linear-gradient(145deg, rgba(0,255,255,0.2), rgba(0,255,255,0.5));
   padding: 10px 8px;
   margin-top: 24px;
   border-radius: 8px;
@@ -67,15 +67,17 @@ body, html {
   border: 2px solid #00ffff;
   box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
   font-family: 'Noto Sans TC', sans-serif;
-  font-size: 0.72em; /* 原本 0.8em → 再縮小 10% */
+  font-size: 0.72em;
+  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8); /* 增加立體感與陰影 */
 }
 
 /* BOT 訊息框 */
 .message.bot {
-  background: rgba(0,0,0,0.5); /* 更透明 10% */
+  background: rgba(0,0,0,0.5);
   border: 2px solid #444;
   box-shadow: 0 0 8px #222;
   color: #ccc;
+  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.6);
 }
 
 /* 特別活動或打賞訊息框發光 */
@@ -83,6 +85,7 @@ body, html {
   box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700;
   border-color: #ffd700;
   color: #ffd700;
+  text-shadow: 1px 1px 2px #000, 0 0 8px #ffd700;
 }
 
 /* 使用者名稱框 */
@@ -94,37 +97,38 @@ body, html {
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,0,0.5); /* 更透明 10% */
+  background: rgba(0,0,0,0.5);
   border: 1px solid #f5d76e;
   color: #f5d76e;
-  text-shadow: 0 0 6px #f5d76e, 0 0 12px #f5d76e;
-  font-size: 0.72em; /* 原本 0.8em → 再縮小 10% */
+  text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
+  font-size: 0.72em;
 }
 
 /* 不同平台霓虹色 */
-.username-box.twitch { border-color:#9146FF; box-shadow:0 0 10px #9146FF,0 0 20px #9146FF; color:#9146FF; }
-.username-box.youtube { border-color:#FF0000; box-shadow:0 0 10px #FF0000,0 0 20px #FF0000; color:#FF0000; }
-.username-box.kick { border-color:#00FF80; box-shadow:0 0 10px #00FF80,0 0 20px #00FF80; color:#00FF80; }
-.username-box.facebook { border-color:#3b5998; box-shadow:0 0 10px #3b5998,0 0 20px #3b5998; color:#3b5998; }
+.username-box.twitch { border-color:#9146FF; box-shadow:0 0 10px #9146FF,0 0 20px #9146FF; color:#9146FF; text-shadow:1px 1px 2px #000,0 0 6px #9146FF; }
+.username-box.youtube { border-color:#FF0000; box-shadow:0 0 10px #FF0000,0 0 20px #FF0000; color:#FF0000; text-shadow:1px 1px 2px #000,0 0 6px #FF0000; }
+.username-box.kick { border-color:#00FF80; box-shadow:0 0 10px #00FF80,0 0 20px #00FF80; color:#00FF80; text-shadow:1px 1px 2px #000,0 0 6px #00FF80; }
+.username-box.facebook { border-color:#3b5998; box-shadow:0 0 10px #3b5998,0 0 20px #3b5998; color:#3b5998; text-shadow:1px 1px 2px #000,0 0 6px #3b5998; }
 
 .text {
   line-height: 1.4;
   word-break: break-word;
-  text-shadow: 0 0 6px rgba(255,255,255,0.8);
+  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
 }
 
 .donation {
   padding: 5px 10px;
   color: #ffd700;
-  text-shadow: 0 0 6px #ffd700, 0 0 12px #ffd700;
+  text-shadow: 1px 1px 2px #000, 0 0 8px #ffd700;
   font-weight: bold;
-  font-size: 0.72em; /* 跟訊息字體一致縮小 */
+  font-size: 0.72em;
 }
 
 .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
