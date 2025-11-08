@@ -8,7 +8,7 @@
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
-body, html {
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -18,75 +18,61 @@ body, html {
   color: #fff;
 }
 
+/* 提高層級，避免被覆蓋；暫時取消高度與裁切限制 */
 #chat-container {
+  position: relative;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 0 20px;
-  max-width: 400px;
-  margin: auto;
-  max-height: 100vh;
-  overflow: hidden;
+  margin: 0 auto;
 }
 
+/* 保留簡單進場動畫 */
 .message-container {
   position: relative;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
   will-change: transform, opacity;
-  animation: fadeInScale 0.4s ease-out;
-}
-
-.message-container.fadeout {
-  animation: floatUpFade 10s linear forwards;
+  animation: fadeInScale 0.25s ease-out;
 }
 
 @keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
-@keyframes floatUpFade {
-  from { transform: translateY(0) scale(1); opacity: 1; }
-  to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
-}
-
-/* 訊息框樣式：透明度 5% + 邊框厚度 1.5px + 下邊緣留空 8px */
+/* 你的需求：5% 背景透明度、邊框 +50%（1.5px）、虹光 -50%、下邊緣留空與左右一致 */
 .message {
   display: inline-block;
   max-width: 100%;
-  background: rgba(0,0,0,0.05); /* 5%透明度 */
-  padding: 10px 8px 8px 8px;   /* 下邊緣留空與左右相同 */
-  margin-top: 20px;
+  background: rgba(0,0,0,0.05);
+  padding: 10px 8px 8px 8px;
+  margin-top: 16px;
   border-radius: 8px;
   color: #fff;
-  position: relative;
   word-wrap: break-word;
-  border: 1.5px solid #00ffff; /* 邊框厚度加 50% */
-  box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff; /* 虹光厚度減半 */
-  font-size: 0.72em;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
+  border: 1.5px solid #00ffff;
+  box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+  font-size: 0.9em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
 
 .message.bot {
   background: rgba(0,0,0,0.05);
   border: 1.5px solid #444;
-  box-shadow: 0 0 4px #222; /* 原本 8px → 減半 */
-  color: #ccc;
+  box-shadow: 0 0 4px #222;
+  color: #ddd;
 }
 
 .message.highlight {
   background: rgba(0,0,0,0.05);
   border: 1.5px solid #ffd700;
-  box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; /* 原本 16px/32px → 減半 */
+  box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700;
   color: #ffd700;
-  animation: glowPulse 2s infinite;
 }
 
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; }
-  50% { box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
-}
-
+/* 使用者名稱框 */
 .username-box {
   position: absolute;
   top: -18px;
@@ -95,23 +81,26 @@ body, html {
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,0,0.05); /* 5%透明度 */
+  background: rgba(0,0,0,0.05);
   border: 1.5px solid #f5d76e;
   color: #f5d76e;
-  font-size: 0.72em;
+  font-size: 0.8em;
 }
 
-.username-box.twitch { border-color:#9146FF; box-shadow:0 0 5px #9146FF,0 0 10px #9146FF; color:#9146FF; }
-.username-box.youtube { border-color:#FF0000; box-shadow:0 0 5px #FF0000,0 0 10px #FF0000; color:#FF0000; }
-.username-box.kick { border-color:#00FF80; box-shadow:0 0 5px #00FF80,0 0 10px #00FF80; color:#00FF80; }
-.username-box.facebook { border-color:#3b5998; box-shadow:0 0 5px #3b5998,0 0 10px #3b5998; color:#3b5998; }
+/* 平台色（不加陰影，先簡化） */
+.username-box.twitch { border-color:#9146FF; color:#9146FF; }
+.username-box.youtube { border-color:#FF0000; color:#FF0000; }
+.username-box.kick { border-color:#00FF80; color:#00FF80; }
+.username-box.facebook { border-color:#3b5998; color:#3b5998; }
 
-.text { line-height: 1.4; word-break: break-word; }
-.donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
+/* 文字區塊 */
+.text { line-height: 1.45; word-break: break-word; }
+.donation { padding: 5px 10px; color: #ffd700; font-weight: 700; font-size: 0.85em; }
 .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
@@ -226,3 +215,4 @@ body, html {
   </script>
 </body>
 </html>
+
