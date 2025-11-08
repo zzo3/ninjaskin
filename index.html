@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 奢華 Cyan 強化版</title>
+  <title>聊天室浮層 - 奢華 Cyan 最終版</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -52,58 +52,59 @@ html, body {
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
 }
 
-/* 訊息框樣式 */
+/* 訊息框樣式：透明度 10% + 邊框厚度 1px + 光暈縮窄一半 */
 .message {
+  position: relative;
   display: inline-block;
   max-width: 100%;
-  background: rgba(0,0,0,0.1); /* 10%透明度 */
-  padding: 10px 8px 8px 8px;
+  background: rgba(0,0,0,0.1);
+  padding: 26px 8px 8px 8px; /* 預留名稱框高度 */
   margin-top: 16px;
   border-radius: 8px;
   color: #fff;
   word-wrap: break-word;
-  border: 1.5px solid #00ffff;
-  box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
+  border: 1px solid #00ffff;
+  box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
   font-size: 0.72em;
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
   transition: box-shadow 0.3s ease;
 }
 
 .message:hover {
-  box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
 
 .message.bot {
   background: rgba(0,0,0,0.1);
-  border: 1.5px solid #444;
-  box-shadow: 0 0 8px #222;
+  border: 1px solid #444;
+  box-shadow: 0 0 4px #222;
   color: #ccc;
 }
 
 .message.highlight {
   background: rgba(0,0,0,0.1);
-  border: 1.5px solid #ffd700;
-  box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700;
+  border: 1px solid #ffd700;
+  box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700;
   color: #ffd700;
   animation: glowPulse 2s infinite;
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700; }
-  50% { box-shadow: 0 0 24px #ffd700, 0 0 40px #ffd700; }
+  0%, 100% { box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; }
+  50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
 /* 使用者名稱框：緊貼訊息框左上角 */
 .username-box {
   position: absolute;
-  top: -18px;
-  left: 8px;
+  top: -1px;   /* 貼齊訊息框邊框 */
+  left: -1px;
   padding: 3px 6px;
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
   background: rgba(0,0,0,0.1);
-  border: 1.5px solid #f5d76e;
+  border: 1px solid #f5d76e;
   color: #f5d76e;
   font-size: 0.72em;
   text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
@@ -111,13 +112,29 @@ html, body {
 }
 
 .username-box:hover {
-  box-shadow: 0 0 16px currentColor, 0 0 32px currentColor;
+  box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
 }
 
-.username-box.twitch { border-color:#9146FF; box-shadow:0 0 10px #9146FF,0 0 20px #9146FF; color:#9146FF; }
-.username-box.youtube { border-color:#FF0000; box-shadow:0 0 10px #FF0000,0 0 20px #FF0000; color:#FF0000; }
-.username-box.kick { border-color:#00FF80; box-shadow:0 0 10px #00FF80,0 0 20px #00FF80; color:#00FF80; }
-.username-box.facebook { border-color:#3b5998; box-shadow:0 0 10px #3b5998,0 0 20px #3b5998; color:#3b5998; }
+.username-box.twitch {
+  border: 1px solid #9146FF;
+  box-shadow: 0 0 5px #9146FF, 0 0 10px #9146FF;
+  color:#9146FF;
+}
+.username-box.youtube {
+  border: 1px solid #FF0000;
+  box-shadow: 0 0 5px #FF0000, 0 0 10px #FF0000;
+  color:#FF0000;
+}
+.username-box.kick {
+  border: 1px solid #00FF80;
+  box-shadow: 0 0 5px #00FF80, 0 0 10px #00FF80;
+  color:#00FF80;
+}
+.username-box.facebook {
+  border: 1px solid #3b5998;
+  box-shadow: 0 0 5px #3b5998, 0 0 10px #3b5998;
+  color:#3b5998;
+}
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
@@ -125,6 +142,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
