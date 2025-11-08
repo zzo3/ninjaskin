@@ -115,23 +115,28 @@ html, body {
 
 
 <body>
-  <div id="chat-container"></div>
+  <!-- 頁面切換選單 -->
+  <div style="position:fixed; top:10px; left:10px; z-index:3000;">
+    <button onclick="showPage('chat')" style="padding:6px 12px; margin-right:5px;">訊息</button>
+    <button onclick="showPage('announcement')" style="padding:6px 12px;">公告管理</button>
+  </div>
 
-  <!-- 公告管理介面 -->
-  <div style="position:fixed; top:10px; right:10px; z-index:2000; background:#222; padding:10px; border-radius:8px; color:#fff; font-size:14px; width:340px;">
-    <h3 style="margin:0 0 8px 0;">公告管理</h3>
-    
-    <!-- 開關公告 -->
+  <!-- 訊息頁面 (預設顯示) -->
+  <div id="chatPage" style="display:block;">
+    <div id="chat-container"></div>
+  </div>
+
+  <!-- 公告管理頁面 (預設隱藏) -->
+  <div id="announcementPage" style="display:none; background:#222; color:#fff; padding:10px; border-radius:8px; width:360px; position:fixed; top:50px; right:10px; z-index:2000;">
+    <h3>公告管理</h3>
     <button onclick="toggleAnnouncement(true)" style="padding:6px 12px; margin-right:5px;">開啟公告</button>
     <button onclick="toggleAnnouncement(false)" style="padding:6px 12px;">關閉公告</button>
     <br><br>
 
-    <!-- 下拉選單推送公告 -->
     <label>選擇公告：</label>
     <select id="announcementSelect" style="width:100%; margin-bottom:8px;"></select>
     <button onclick="sendSelectedAnnouncement()" style="padding:6px 12px; width:100%; margin-bottom:10px;">立即推送</button>
 
-    <!-- 編輯公告 -->
     <label>文字：</label><br>
     <input id="msgText" type="text" style="width:100%;"><br>
     <label>顏色 (Hex)：</label><br>
@@ -148,21 +153,25 @@ html, body {
       <button onclick="deleteAnnouncement()" style="flex:1; padding:6px;">刪除</button>
     </div>
 
-    <!-- 公告列表顯示 -->
-    <h4 style="margin:10px 0 5px 0;">公告列表</h4>
+    <h4>公告列表</h4>
     <div id="announcementList" style="max-height:220px; overflow-y:auto; background:#333; padding:5px; border-radius:5px;"></div>
   </div>
 
   <script>
-    /* ========= 可調整參數設定區 ========= */
+    /* ========= 切換頁面 ========= */
+    function showPage(page) {
+      document.getElementById("chatPage").style.display = (page === "chat") ? "block" : "none";
+      document.getElementById("announcementPage").style.display = (page === "announcement") ? "block" : "none";
+    }
+
+    /* ========= 公告邏輯 ========= */
     let scheduledMessages = [
       { text: "歡迎來到直播間！", color: "#00ffff", glow: true, interval: 300000 },
       { text: "記得訂閱和按讚支持～", color: "#ff0000", glow: true, interval: 600000 },
       { text: "加入會員享受更多福利！", color: "#00ff80", glow: false, interval: 900000 }
     ];
-
-    const maxMessages = 50;
     let autoAnnouncement = true;
+    const maxMessages = 50;
 
     function toggleAnnouncement(on) { autoAnnouncement = on; }
 
@@ -254,12 +263,10 @@ html, body {
       });
     }
 
-    /* ========= 聊天訊息顯示邏輯 ========= */
+    /* ========= 訊息顯示邏輯 ========= */
     const chatContainer = document.getElementById('chat-container');
 
     function addMessageToOverlay(data) {
-      if (!data.chatname && data.meta) return;
-
       const messageContainer = document.createElement('div');
       messageContainer.classList.add('message-container');
 
@@ -292,16 +299,9 @@ html, body {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // 預設顯示訊息頁面
+      showPage("chat");
       refreshAnnouncementSelect();
 
       // 啟動自動公告
-      scheduledMessages.forEach((msg, idx) => {
-        setInterval(() => {
-          if (!autoAnnouncement) return;
-          sendAnnouncementNow(idx);
-        }, msg.interval);
-      });
-    });
-  </script>
-</body>
-</html>
+      scheduledMessages.for
