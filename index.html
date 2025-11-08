@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 奢華 Cyan 最終版</title>
+  <title>聊天室浮層 - 奢華 Cyan 專業版</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -31,40 +31,26 @@ html, body {
   overflow-y: auto;
 }
 
-/* 美化滾輪 */
-#chat-container::-webkit-scrollbar { width: 8px; }
-#chat-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #00ffff, #00e0e0);
-  border-radius: 4px;
-}
-#chat-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #00e0e0, #00cccc);
-}
-#chat-container::-webkit-scrollbar-track {
-  background: rgba(0,255,255,0.15);
-}
-#chat-container {
-  scrollbar-width: thin;
-  scrollbar-color: #00ffff rgba(0,255,255,0.15);
-}
-
 /* 訊息容器 */
 .message-container {
   position: relative;
   margin-bottom: 33px;
-  will-change: opacity;
-  animation: fadeIn 0.4s ease-out;
+  will-change: transform, opacity;
+  animation: slideUpFade 0.6s ease-out; /* 柔和由下往上滑入 */
 }
 .message-container.fadeout {
   animation: fadeOutOnly 10s ease-out forwards;
-  animation-delay: 30s; /* 停留30秒再淡出 */
+  animation-delay: 30s;
 }
-.message-container.fadeout:hover { animation-play-state: paused; }
+.message-container.fadeout:hover {
+  animation-play-state: paused;
+  opacity: 1 !important; /* 滑鼠移上去暫時顯示回來 */
+}
 
 /* 動畫 */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeOutOnly {
   from { opacity: 1; }
@@ -86,15 +72,9 @@ html, body {
   box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
   font-size: 0.75em;
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
-  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
-}
-.message:hover {
-  box-shadow: 0 0 14px #00ffff, 0 0 28px #00ffff;
-  background: rgba(0,0,0,0.2);
-  transform: scale(1.03);
 }
 
-/* 名稱框 */
+/* 名稱框：透明背景 + 漸層邊框 */
 .username-box {
   position: absolute;
   top: -27px;
@@ -103,31 +83,17 @@ html, body {
   border-radius: 10px;
   font-weight: 600;
   z-index: 2;
+  background: rgba(0,0,0,0.2);
   border: 2px solid transparent;
-  background-clip: padding-box, border-box;
-  -webkit-background-clip: padding-box, border-box;
   font-size: 0.85em;
   text-shadow: 1px 1px 2px #000;
   overflow: hidden;
 }
 
-/* 平台樣式：漸層背景確保圓角 */
-.username-box.twitch {
-  background: linear-gradient(90deg, #9146FF, #6a30cc);
-  color: #fff;
-}
-.username-box.youtube {
-  background: linear-gradient(90deg, #FF0000, #cc0000);
-  color: #fff;
-}
-.username-box.kick {
-  background: linear-gradient(90deg, #00FF80, #00cc66);
-  color: #000;
-}
-.username-box.facebook {
-  background: linear-gradient(90deg, #3b5998, #2d4373);
-  color: #fff;
-}
+.username-box.twitch { border-image: linear-gradient(90deg, #9146FF, #6a30cc) 1; color: #fff; }
+.username-box.youtube { border-image: linear-gradient(90deg, #FF0000, #cc0000) 1; color: #fff; }
+.username-box.kick { border-image: linear-gradient(90deg, #00FF80, #00cc66) 1; color: #000; }
+.username-box.facebook { border-image: linear-gradient(90deg, #3b5998, #2d4373) 1; color: #fff; }
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
@@ -143,7 +109,6 @@ html, body {
   <div id="chat-container"></div>
 
   <script>
-    // 房間設定
     var urlParams = new URLSearchParams(window.location.search);
     var roomID = urlParams.has("session") ? urlParams.get("session") : "4DP7Stjuew";
     var password = "false"; 
@@ -151,7 +116,6 @@ html, body {
 
     const chatContainer = document.getElementById('chat-container');
 
-    // 新增訊息到畫面
     function addMessageToOverlay(data) {
       if (!data.chatname && data.meta) return;
 
@@ -162,20 +126,6 @@ html, body {
       messageDiv.classList.add('message');
       if (data.mid) messageDiv.id = data.mid;
 
-      // BOT 訊息
-      if (data.type && data.type.toLowerCase().includes("bot")) {
-        messageDiv.classList.add("bot");
-      }
-
-      // 特別活動或打賞訊息
-      if (data.event) {
-        const specialEvents = ["subscriber","gifted","bits","combo","gift","loyalty","donation","follower"];
-        if (specialEvents.some(ev => data.event.toLowerCase().includes(ev))) {
-          messageDiv.classList.add("highlight");
-        }
-      }
-
-      // 平台樣式
       let platformClass = "";
       if (data.type) {
         const type = data.type.toLowerCase();
@@ -185,7 +135,6 @@ html, body {
         else if (type.includes("facebook")) platformClass = "facebook";
       }
 
-      // 訊息內容
       messageDiv.innerHTML = `
         <div class="username-box ${platformClass}">
           <span>${data.chatname || ''}</span>
@@ -198,18 +147,17 @@ html, body {
       messageContainer.appendChild(messageDiv);
       chatContainer.appendChild(messageContainer);
 
-      // 每則訊息：停留30秒 → 漸漸淡出10秒 → 保留在 DOM，不立即移除
+      // 停留30秒 → 漸漸淡出10秒 → 保留在 DOM
       setTimeout(() => {
         messageContainer.classList.add('fadeout');
       }, 30000);
 
-      // 最多保留10條訊息 → 超過才移除最舊的
-      while (chatContainer.children.length > 10) {
+      // 最多保留 50 條訊息 → 超過才移除最舊的
+      while (chatContainer.children.length > 50) {
         chatContainer.removeChild(chatContainer.firstChild);
       }
     }
 
-    // 初始化 Social Stream Ninja iframe
     document.addEventListener('DOMContentLoaded', () => {
       const iframe = document.createElement("iframe");
       iframe.src = featuredMode
