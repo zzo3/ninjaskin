@@ -24,43 +24,43 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 15px; /* 上下左右邊距改為15px */
+  padding: 15px;
   max-width: 400px;
   margin: 0 auto;
   max-height: 100vh;
-  overflow-y: auto; /* 可滾動 */
+  overflow-y: auto;
 }
 
-/* 美化滾輪：比原來幼50%，顏色全是cyan */
+/* 美化滾輪：支援 Chrome / Brave / Edge (WebKit) */
 #chat-container::-webkit-scrollbar {
-  width: 3px; /* 原本6px → 現在3px */
+  width: 3px;
 }
 #chat-container::-webkit-scrollbar-thumb {
-  background: #00ffff; /* cyan */
+  background: linear-gradient(to bottom, rgba(0,255,255,0.8), rgba(0,224,224,0.6));
   border-radius: 2px;
 }
 #chat-container::-webkit-scrollbar-thumb:hover {
-  background: #00e0e0; /* hover時稍微深一點的cyan */
+  background: linear-gradient(to bottom, rgba(0,255,255,1), rgba(0,224,224,0.8));
 }
 #chat-container::-webkit-scrollbar-track {
-  background: rgba(0,255,255,0.1); /* track也用淡cyan */
+  background: rgba(0,255,255,0.1);
 }
 
 /* Firefox 支援 */
 #chat-container {
   scrollbar-width: thin;
-  scrollbar-color: #00ffff rgba(0,255,255,0.1);
+  scrollbar-color: rgba(0,255,255,0.8) rgba(0,255,255,0.1);
 }
 
 .message-container {
   position: relative;
-  margin-bottom: 28px;
+  margin-bottom: 30px; /* 原本28px → 現在30px */
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
 
 .message-container.fadeout {
-  animation: floatUpFade 30s linear forwards; /* 30秒後消失 */
+  animation: floatUpFade 30s ease-out forwards; /* linear → ease-out */
   animation-play-state: running;
 }
 
@@ -84,23 +84,24 @@ html, body {
   position: relative;
   display: inline-block;
   max-width: 100%;
-  background: rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,0,0,0.2));
   padding: 8px;
   border-radius: 8px;
   color: #fff;
   word-wrap: break-word;
   border: 1px solid #00ffff;
   box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
-  font-size: 0.72em;
+  font-size: 0.85em; /* 字體稍微放大 */
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
-  transition: box-shadow 0.3s ease, background 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
   animation: softPulse 4s infinite;
 }
 
-/* 滑鼠移過去時光暈加強 + 透明度改成20% */
+/* 3. 強化 hover 效果：加上縮放 */
 .message:hover {
   box-shadow: 0 0 14px #00ffff, 0 0 28px #00ffff;
   background: rgba(0,0,0,0.2);
+  transform: scale(1.03);
 }
 
 @keyframes softPulse {
@@ -130,10 +131,10 @@ html, body {
   50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
-/* 名稱框：外部左上角，字體加大10% */
+/* 名稱框：外部左上角，字體加大10%，與訊息框留2px */
 .username-box {
   position: absolute;
-  top: -22px;
+  top: -24px; /* 原本-22px → 現在-24px */
   left: 0;
   padding: 3px 6px;
   border-radius: 4px;
@@ -142,30 +143,35 @@ html, body {
   background: rgba(0,0,0,0.1);
   border: 1px solid #f5d76e;
   color: #f5d76e;
-  font-size: 0.8em; /* 字體加大10% */
+  font-size: 0.8em;
   text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
   box-shadow: 0 0 5px #f5d76e, 0 0 10px #f5d76e;
 }
 
+/* 6. 名稱框更突出：漸層邊框 */
 .username-box.twitch {
-  border: 1px solid #9146FF;
-  box-shadow: 0 0 5px #9146FF, 0 0 10px #9146FF;
-  color:#9146FF;
+  border: 1px solid transparent;
+  border-image: linear-gradient(90deg, #9146FF, #6a30cc) 1;
+  box-shadow: 0 0 6px #9146FF, 0 0 12px #6a30cc;
+  color: #9146FF;
 }
 .username-box.youtube {
-  border: 1px solid #FF0000;
-  box-shadow: 0 0 5px #FF0000, 0 0 10px #FF0000;
-  color:#FF0000;
+  border: 1px solid transparent;
+  border-image: linear-gradient(90deg, #FF0000, #cc0000) 1;
+  box-shadow: 0 0 6px #FF0000, 0 0 12px #cc0000;
+  color: #FF0000;
 }
 .username-box.kick {
-  border: 1px solid #00FF80;
-  box-shadow: 0 0 5px #00FF80, 0 0 10px #00FF80;
-  color:#00FF80;
+  border: 1px solid transparent;
+  border-image: linear-gradient(90deg, #00FF80, #00cc66) 1;
+  box-shadow: 0 0 6px #00FF80, 0 0 12px #00cc66;
+  color: #00FF80;
 }
 .username-box.facebook {
-  border: 1px solid #3b5998;
-  box-shadow: 0 0 5px #3b5998, 0 0 10px #3b5998;
-  color:#3b5998;
+  border: 1px solid transparent;
+  border-image: linear-gradient(90deg, #3b5998, #2d4373) 1;
+  box-shadow: 0 0 6px #3b5998, 0 0 12px #2d4373;
+  color: #3b5998;
 }
 
 .text { line-height: 1.4; word-break: break-word; }
@@ -174,6 +180,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
