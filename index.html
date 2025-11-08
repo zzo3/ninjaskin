@@ -33,7 +33,7 @@ html, body {
 
 /* 美化滾輪：支援 Chrome / Brave / Edge */
 #chat-container::-webkit-scrollbar {
-  width: 8px; /* 加粗避免灰色 */
+  width: 8px;
 }
 #chat-container::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, #00ffff, #00e0e0);
@@ -54,7 +54,7 @@ html, body {
 
 .message-container {
   position: relative;
-  margin-bottom: 33px; /* 與訊息框之間留5px */
+  margin-bottom: 33px; /* 訊息框之間留5px */
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
@@ -84,13 +84,14 @@ html, body {
   display: inline-block;
   max-width: 100%;
   background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,0,0,0.2));
+  background-clip: padding-box;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 10px; /* 改成10px圓角 */
   color: #fff;
   word-wrap: break-word;
   border: 1px solid #00ffff;
   box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
-  font-size: 0.85em;
+  font-size: 0.75em; /* 訊息字體縮小 */
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
   transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
   animation: softPulse 4s infinite;
@@ -129,19 +130,19 @@ html, body {
   50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
-/* 名稱框：與訊息框留3px空間，圓角 */
+/* 名稱框：與訊息框留3px空間，圓角一致 */
 .username-box {
   position: absolute;
-  top: -27px; /* 與訊息框留3px */
+  top: -27px;
   left: 0;
   padding: 3px 6px;
-  border-radius: 8px; /* 改成跟訊息框一樣的圓角 */
+  border-radius: 10px; /* 改成10px圓角 */
   font-weight: 600;
   z-index: 2;
   background: rgba(0,0,0,0.1);
   border: 1px solid #f5d76e;
   color: #f5d76e;
-  font-size: 0.8em;
+  font-size: 0.85em; /* 名稱字體加大 */
   text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
   box-shadow: 0 0 5px #f5d76e, 0 0 10px #f5d76e;
 }
