@@ -14,7 +14,7 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: 'Noto Sans TC', sans-serif;
-  background: transparent;
+  background: transparent; /* 背景全透明 */
   color: #fff;
 }
 
@@ -22,35 +22,24 @@ body, html {
   display: flex;
   flex-direction: column;
   justify-content: flex-end; /* 新訊息由下往上 */
-  padding: 0 15px; /* 左右增加 15px 距離 */
+  padding: 0 20px; /* 左右留出 20px 空間 */
   max-width: 400px;
   margin: auto;
   max-height: 100vh;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden; /* 不顯示滾動條，訊息往上升直到消失 */
 }
-#chat-container::-webkit-scrollbar { display: none; }
 
 .message-container {
   position: relative;
-  margin-bottom: 5px; /* 間距縮小 */
-  will-change: opacity, transform;
-}
-.message-container.visible {
-  animation: fadeInUp 220ms ease-out forwards;
-}
-.message-container.removing {
-  animation: fadeOutUp 300ms ease-in forwards;
+  margin-bottom: 5px;
+  will-change: transform, opacity;
+  animation: floatUp linear forwards;
+  animation-duration: 30s; /* 30 秒持續往上升 */
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeOutUp {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(-8px); }
+@keyframes floatUp {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-120vh); opacity: 0; } /* 超出背景後消失 */
 }
 
 /* 訊息框：漸層 Cyan */
@@ -136,33 +125,35 @@ body, html {
   <div id="chat-container"></div>
 
   <script>
+    // 讀取房間參數
     var urlParams = new URLSearchParams(window.location.search);
-    var roomID = "4DP7Stjuew"; 
+    var roomID = "4DP7Stjuew";
     if (urlParams.has("session")) {
       roomID = urlParams.get("session");
     }
-    var password = "false"; 
-    var featuredMode = false; 
+    var password = "false";
+    var featuredMode = false;
 
     const chatContainer = document.getElementById('chat-container');
-    const SHOWTIME = 20000; // 20 秒後自動消失
 
     function addMessageToOverlay(data) {
+      // 沒有使用者名稱且屬於系統訊息時跳過
       if (!data.chatname && data.meta) return;
 
+      // 建立容器與訊息元素
       const messageContainer = document.createElement('div');
       messageContainer.classList.add('message-container');
-      
+
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
       if (data.mid) messageDiv.id = data.mid;
 
-      // BOT 訊息
+      // BOT 訊息樣式
       if (data.type && data.type.toLowerCase().includes("bot")) {
         messageDiv.classList.add("bot");
       }
 
-      // 特別活動或打賞訊息
+      // 特別活動或打賞樣式（訂閱、贈訂、小奇點、combo、禮物、忠誠點數、追隨、donation）
       if (data.event) {
         const specialEvents = ["subscriber","gifted","bits","combo","gift","loyalty","donation","follower"];
         if (specialEvents.some(ev => data.event.toLowerCase().includes(ev))) {
@@ -170,6 +161,7 @@ body, html {
         }
       }
 
+      // 平台樣式
       let platformClass = "";
       if (data.type) {
         const type = data.type.toLowerCase();
@@ -179,32 +171,25 @@ body, html {
         else if (type.includes("facebook")) platformClass = "facebook";
       }
 
+      // 內容
       messageDiv.innerHTML = `
         <div class="username-box ${platformClass}">
-          <span>${data.chatname}</span>
+          <span>${data.chatname || ''}</span>
           <span class="badges"></span>
         </div>
         <div class="text">${data.chatmessage || ''}</div>
-        ${(data.donation||data.hasDonation) ? `<div class="donation">${(data.donation||data.hasDonation)}</div>` : ''}
+        ${(data.donation || data.hasDonation) ? `<div class="donation">${(data.donation || data.hasDonation)}</div>` : ''}
       `;
 
       messageContainer.appendChild(messageDiv);
-      chatContainer.appendChild(messageContainer); // 新訊息在底部
+      chatContainer.appendChild(messageContainer); // 新訊息在底部顯示
 
-      requestAnimationFrame(() => {
-        messageContainer.classList.add('visible');
+      // 動畫結束後移除 DOM（避免長時間累積）
+      messageContainer.addEventListener('animationend', (e) => {
+        if (e.animationName === 'floatUp') {
+          messageContainer.remove();
+        }
       });
-
-      if (SHOWTIME > 0) {
-        setTimeout(() => {
-          messageContainer.classList.add('removing');
-          setTimeout(() => {
-            if (messageContainer.parentNode) {
-              messageContainer.parentNode.removeChild(messageContainer);
-            }
-          }, 300);
-        }, SHOWTIME);
-      }
     }
 
     // 初始化 Social Stream Ninja iframe
@@ -219,12 +204,12 @@ body, html {
 
       window.addEventListener("message", (event) => {
         if (event.source !== iframe.contentWindow) return;
-        if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
-          addMessageToOverlay(event.data.dataReceived.overlayNinja);
+        const payload = event.data && event.data.dataReceived;
+        if (payload && payload.overlayNinja) {
+          addMessageToOverlay(payload.overlayNinja);
         }
       });
     });
   </script>
 </body>
 </html>
-
