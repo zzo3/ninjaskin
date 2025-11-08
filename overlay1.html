@@ -1,0 +1,243 @@
+太好了 🙌  
+我已經幫你把 **CSS + JS** 完整合併，並且修改了 JS 部分，讓它會根據不同平台 (`data.type`) 自動加上對應的 class（例如 twitch、youtube、kick），這樣就能套用你要的「像素霓虹風格」名稱框。  
+
+以下是完整的程式碼：
+
+---
+
+```html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室浮層</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        /* 全域設定：像素霓虹風格 + 背景透明度 20% */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Press Start 2P', cursive;
+            background: rgba(0, 0, 0, 0.2); /* 背景透明度 20% */
+            color: #fff;
+        }
+
+        /* 訊息容器動畫 */
+        .message-container {
+            position: relative;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .message-container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .message-container.removing {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* 使用者名稱框：基礎霓虹像素風格 */
+        .username-box {
+            display: flex;
+            position: absolute;
+            top: -19px;
+            left: 0px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: 600;
+            z-index: 2;
+            text-shadow: 0 0 6px rgba(255,255,255,0.8);
+            border: 2px solid #fff;
+        }
+
+        /* Twitch 紫色霓虹 */
+        .username-box.twitch {
+            background: rgba(145, 70, 255, 0.2);
+            border-color: #9146FF;
+            box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
+            color: #fff;
+        }
+
+        /* Kick 綠色霓虹 */
+        .username-box.kick {
+            background: rgba(0, 255, 128, 0.2);
+            border-color: #00FF80;
+            box-shadow: 0 0 10px #00FF80, 0 0 20px #00FF80;
+            color: #fff;
+        }
+
+        /* YouTube 紅色霓虹 */
+        .username-box.youtube {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #FF0000;
+            box-shadow: 0 0 10px #FF0000, 0 0 20px #FF0000;
+            color: #fff;
+        }
+
+        /* Facebook 藍色霓虹 */
+        .username-box.facebook {
+            background: rgba(59, 89, 152, 0.2);
+            border-color: #3b5998;
+            box-shadow: 0 0 10px #3b5998, 0 0 20px #3b5998;
+            color: #fff;
+        }
+
+        /* 訊息框：霓虹邊框 + 背景透明度 20% */
+        .message {
+            display: inline-block;
+            max-height: 150px;
+            max-width: 100%;
+            background: rgba(25, 25, 25, 0.2);
+            padding: 24px 18px 18px 18px;
+            margin-top: 22px;
+            margin-left: 15px;
+            border-radius: 6px;
+            color: #fff;
+            position: relative;
+            word-wrap: break-word;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 8px #0ff, 0 0 16px #0ff;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* 訊息文字 */
+        .text {
+            font-size: clamp(0.85em, 2.5vw, 1em);
+            line-height: 1.4;
+            word-break: break-word;
+            text-shadow: 0 0 6px rgba(255,255,255,0.8);
+        }
+
+        /* 贊助/斗內顯示 */
+        .donation {
+            padding: 7px 18px 5px 18px;
+            color: #ffea00;
+            text-shadow: 0 0 6px #ffea00, 0 0 12px #ffea00;
+            font-weight: bold;
+        }
+
+        /* 徽章 */
+        .badge {
+            height: 1em;
+            vertical-align: middle;
+            margin-left: 0px;
+        }
+        .badges {
+            margin-left: 10px;
+        }
+
+        /* 聊天容器 */
+        #chat-container {
+            padding: 0;
+            max-width: 350px;
+            margin: auto;
+            max-height: 100vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #chat-container::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+
+    <script>
+    // Social Stream Ninja 參數設定
+    var urlParams = new URLSearchParams(window.location.search);
+    var roomID = "4DP7Stjuew"; // 預設房間 ID
+
+    if (urlParams.has("session")) {
+        roomID = urlParams.get("session");
+    }
+    var password = "false"; 
+    var featuredMode = false; 
+
+    const chatContainer = document.getElementById('chat-container');
+
+    const SHOWTIME = (() => {
+        const v = parseInt(urlParams.get('showtime') || '30000');
+        return isNaN(v) ? 30000 : v;
+    })();
+
+    // 新增訊息到浮層
+    function addMessageToOverlay(data) {
+        if (!data.chatname && data.meta) {
+            return;
+        }
+
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        if (data.mid) messageDiv.id = data.mid;
+
+        // 判斷平台並加上對應 class
+        let platformClass = "";
+        if (data.type) {
+            const type = data.type.toLowerCase();
+            if (type.includes("twitch")) platformClass = "twitch";
+            else if (type.includes("youtube")) platformClass = "youtube";
+            else if (type.includes("kick")) platformClass = "kick";
+            else if (type.includes("facebook")) platformClass = "facebook";
+        }
+
+        let chatbadges = "";
+        if (data.chatbadges) {
+            data.chatbadges.slice(0, 2).forEach(badge => {
+                if (typeof badge === "object") {
+                    if (badge.type === "img" && badge.src) {
+                        chatbadges += `<img class='badge' src='${badge.src}' />`;
+                    } else if (badge.type === "svg" && badge.html) {
+                        chatbadges += `<span class='badge svg'>${badge.html}</span>`;
+                    }
+                } else {
+                    chatbadges += `<img class='badge' src='${badge}' />`;
+                }
+            });
+        }
+
+        messageDiv.innerHTML = `
+            ${data.chatimg ? `<div class="avatar-wrapper"><div class="avatar" style="background-image: url('${data.chatimg}');"></div></div>` : ''}
+            <div class="username-box ${platformClass}">
+                <span>${data.chatname}</span>
+                <span class="badges">${chatbadges}</span>
+            </div>
+            <div class="text">${data.chatmessage || ''}</div>
+            ${(data.donation||data.hasDonation) ? `<div class="donation">${(data.donation||data.hasDonation)}</div>` : ''}
+        `;
+
+        messageContainer.appendChild(messageDiv);
+        
+        const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 1;
+        chatContainer.appendChild(messageContainer);
+
+        messageContainer.offsetHeight;
+        
+        requestAnimationFrame(() => {
+            messageContainer.classList.add('visible');
+        });
+
+        if (isAtBottom) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        if (SHOWTIME > 0) {
+            setTimeout(() => {
+                messageContainer.classList.add('removing');
+                setTimeout(() => {
+                    if (messageContainer.parentNode) {
