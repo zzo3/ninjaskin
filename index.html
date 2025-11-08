@@ -7,7 +7,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-        /* 全域設定：像素霓虹風格 + 背景透明度 20% */
         body, html {
             margin: 0;
             padding: 0;
@@ -18,7 +17,6 @@
             color: #fff;
         }
 
-        /* 訊息容器動畫 */
         .message-container {
             position: relative;
             margin-bottom: 20px;
@@ -26,19 +24,16 @@
             transform: scale(0.95);
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
-
         .message-container.visible {
             opacity: 1;
             transform: scale(1);
         }
-
         .message-container.removing {
             opacity: 0;
             transform: scale(0.9);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        /* 使用者名稱框：基礎霓虹像素風格 */
         .username-box {
             display: flex;
             position: absolute;
@@ -51,32 +46,24 @@
             text-shadow: 0 0 6px rgba(255,255,255,0.8);
             border: 2px solid #fff;
         }
-
-        /* Twitch 紫色霓虹 */
         .username-box.twitch {
             background: rgba(145, 70, 255, 0.2);
             border-color: #9146FF;
             box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
             color: #fff;
         }
-
-        /* Kick 綠色霓虹 */
         .username-box.kick {
             background: rgba(0, 255, 128, 0.2);
             border-color: #00FF80;
             box-shadow: 0 0 10px #00FF80, 0 0 20px #00FF80;
             color: #fff;
         }
-
-        /* YouTube 紅色霓虹 */
         .username-box.youtube {
             background: rgba(255, 0, 0, 0.2);
             border-color: #FF0000;
             box-shadow: 0 0 10px #FF0000, 0 0 20px #FF0000;
             color: #fff;
         }
-
-        /* Facebook 藍色霓虹 */
         .username-box.facebook {
             background: rgba(59, 89, 152, 0.2);
             border-color: #3b5998;
@@ -84,7 +71,6 @@
             color: #fff;
         }
 
-        /* 訊息框：霓虹邊框 + 背景透明度 20% */
         .message {
             display: inline-block;
             max-height: 150px;
@@ -102,7 +88,6 @@
             font-family: 'Press Start 2P', cursive;
         }
 
-        /* 訊息文字 */
         .text {
             font-size: clamp(0.85em, 2.5vw, 1em);
             line-height: 1.4;
@@ -110,7 +95,6 @@
             text-shadow: 0 0 6px rgba(255,255,255,0.8);
         }
 
-        /* 贊助/斗內顯示 */
         .donation {
             padding: 7px 18px 5px 18px;
             color: #ffea00;
@@ -118,7 +102,6 @@
             font-weight: bold;
         }
 
-        /* 徽章 */
         .badge {
             height: 1em;
             vertical-align: middle;
@@ -128,7 +111,6 @@
             margin-left: 10px;
         }
 
-        /* 聊天容器 */
         #chat-container {
             padding: 0;
             max-width: 350px;
@@ -138,7 +120,6 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-
         #chat-container::-webkit-scrollbar {
             display: none;
         }
@@ -150,7 +131,6 @@
     <script>
     var urlParams = new URLSearchParams(window.location.search);
     var roomID = "4DP7Stjuew"; 
-
     if (urlParams.has("session")) {
         roomID = urlParams.get("session");
     }
@@ -158,16 +138,13 @@
     var featuredMode = false; 
 
     const chatContainer = document.getElementById('chat-container');
-
     const SHOWTIME = (() => {
         const v = parseInt(urlParams.get('showtime') || '30000');
         return isNaN(v) ? 30000 : v;
     })();
 
     function addMessageToOverlay(data) {
-        if (!data.chatname && data.meta) {
-            return;
-        }
+        if (!data.chatname && data.meta) return;
 
         const messageContainer = document.createElement('div');
         messageContainer.classList.add('message-container');
@@ -211,19 +188,12 @@
         `;
 
         messageContainer.appendChild(messageDiv);
-        
-        const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 1;
         chatContainer.appendChild(messageContainer);
 
         messageContainer.offsetHeight;
-        
         requestAnimationFrame(() => {
             messageContainer.classList.add('visible');
         });
-
-        if (isAtBottom) {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
 
         if (SHOWTIME > 0) {
             setTimeout(() => {
@@ -238,4 +208,26 @@
     }
 
     // 測試訊息模擬程式碼
-    document.addEventListener("DOMContentLoaded",
+    document.addEventListener("DOMContentLoaded", () => {
+        addMessageToOverlay({
+            chatname: "Twitch用戶",
+            chatmessage: "這是一則來自 Twitch 的測試訊息 🎮",
+            type: "twitch",
+            chatimg: "https://static-cdn.jtvnw.net/jtv_user_pictures/x.png"
+        });
+
+        addMessageToOverlay({
+            chatname: "YouTube用戶",
+            chatmessage: "這是一則來自 YouTube 的測試訊息 ▶️",
+            type: "youtube",
+            chatimg: "https://yt3.ggpht.com/ytc/AKedOLQ.png"
+        });
+
+        addMessageToOverlay({
+            chatname: "Kick用戶",
+            chatmessage: "這是一則來自 Kick 的測試訊息 💚",
+            type: "kick",
+            chatimg: "https://kick.com/favicon.ico"
+        });
+    });
+   
