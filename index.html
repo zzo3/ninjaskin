@@ -33,7 +33,7 @@ html, body {
 
 /* 美化滾輪：支援 Chrome / Brave / Edge */
 #chat-container::-webkit-scrollbar {
-  width: 8px; /* 加粗避免顯示灰色 */
+  width: 8px; /* 加粗避免灰色 */
 }
 #chat-container::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, #00ffff, #00e0e0);
@@ -54,7 +54,7 @@ html, body {
 
 .message-container {
   position: relative;
-  margin-bottom: 32px; /* 原本30px → 現在32px，多留2px */
+  margin-bottom: 33px; /* 與訊息框之間留5px */
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
@@ -129,13 +129,13 @@ html, body {
   50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
-/* 名稱框：與訊息框留2px空間 */
+/* 名稱框：與訊息框留3px空間，圓角 */
 .username-box {
   position: absolute;
-  top: -26px; /* 原本-24px → 現在-26px，多留2px */
+  top: -27px; /* 與訊息框留3px */
   left: 0;
   padding: 3px 6px;
-  border-radius: 4px;
+  border-radius: 8px; /* 改成跟訊息框一樣的圓角 */
   font-weight: 600;
   z-index: 2;
   background: rgba(0,0,0,0.1);
@@ -178,6 +178,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
