@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 奢華 Cyan 專業版</title>
+  <title>聊天室浮層 - 專業版</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -35,9 +35,9 @@ html, body {
 /* 訊息容器 */
 .message-container {
   position: relative;
-  margin-bottom: 33px;
+  margin-bottom: 40px; /* 預留空間給名稱框 */
   will-change: transform, opacity;
-  animation: slideUpFade 0.6s ease-out; /* 柔和由下往上滑入 */
+  animation: slideUpFade 0.6s ease-out;
 }
 .message-container.fadeout {
   animation: fadeOutOnly 10s ease-out forwards;
@@ -45,8 +45,8 @@ html, body {
 }
 .message-container.fadeout:hover {
   animation-play-state: paused;
-  opacity: 1 !important; /* 滑鼠移上去暫時顯示回來 */
-  transform: scale(1.03); /* hover 時輕微放大 */
+  opacity: 1 !important;
+  transform: scale(1.03);
 }
 
 /* 動畫 */
@@ -76,45 +76,28 @@ html, body {
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
 }
 
-/* 名稱框：透明背景 + 漸層邊框 */
+/* 名稱框：無背景，僅邊框顏色，透明度0.1 */
 .username-box {
   position: absolute;
-  top: -27px;
+  bottom: 100%; /* 放在訊息框上方 */
   left: 0;
-  padding: 6px 10px;
+  margin-bottom: 3px; /* 與訊息框間距 */
+  padding: 4px 8px;
   border-radius: 10px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,0,0.2);
-  border: 2px solid transparent;
+  background: transparent;
+  border: 2px solid;
+  opacity: 0.1; /* 邊框透明度 */
   font-size: 0.85em;
   text-shadow: 1px 1px 2px #000;
-  overflow: hidden;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
 }
 
-/* 平台樣式：漸層邊框 */
-.username-box.twitch {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
-                    linear-gradient(90deg, #9146FF, #6a30cc);
-  color: #fff;
-}
-.username-box.youtube {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
-                    linear-gradient(90deg, #FF0000, #cc0000);
-  color: #fff;
-}
-.username-box.kick {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
-                    linear-gradient(90deg, #00FF80, #00cc66);
-  color: #000;
-}
-.username-box.facebook {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
-                    linear-gradient(90deg, #3b5998, #2d4373);
-  color: #fff;
-}
+/* 平台樣式：邊框顏色 */
+.username-box.twitch { border-color: #9146FF; color: #9146FF; }
+.username-box.youtube { border-color: #FF0000; color: #FF0000; }
+.username-box.kick { border-color: #00FF80; color: #00FF80; }
+.username-box.facebook { border-color: #3b5998; color: #3b5998; }
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
@@ -122,6 +105,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
@@ -198,3 +182,4 @@ html, body {
   </script>
 </body>
 </html>
+
