@@ -24,22 +24,40 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 20px;
+  padding: 15px; /* 上下左右邊距改為15px */
   max-width: 400px;
   margin: 0 auto;
   max-height: 100vh;
-  overflow: hidden;
+  overflow-y: auto; /* 可滾動 */
+}
+
+/* 美化滾輪 */
+#chat-container::-webkit-scrollbar {
+  width: 6px;
+}
+#chat-container::-webkit-scrollbar-thumb {
+  background: #00ffff;
+  border-radius: 3px;
+}
+#chat-container::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
 }
 
 .message-container {
   position: relative;
-  margin-bottom: 28px; /* 預留名稱框在外部的空間 */
+  margin-bottom: 28px;
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
 
 .message-container.fadeout {
-  animation: floatUpFade 10s linear forwards;
+  animation: floatUpFade 30s linear forwards; /* 30秒後消失 */
+  animation-play-state: running;
+}
+
+/* 滑鼠移過去時暫停消失動畫 */
+.message-container.fadeout:hover {
+  animation-play-state: paused;
 }
 
 @keyframes fadeInScale {
@@ -52,13 +70,13 @@ html, body {
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
 }
 
-/* 一般訊息：淡淡光暈 + hover/pulse */
+/* 一般訊息 */
 .message {
   position: relative;
   display: inline-block;
   max-width: 100%;
   background: rgba(0,0,0,0.1);
-  padding: 10px 8px 8px 8px; /* 正常內距 */
+  padding: 8px; /* 內距全改為8px */
   border-radius: 8px;
   color: #fff;
   word-wrap: break-word;
@@ -66,12 +84,14 @@ html, body {
   box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
   font-size: 0.72em;
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
   animation: softPulse 4s infinite;
 }
 
+/* 滑鼠移過去時光暈加強 + 透明度改成20% */
 .message:hover {
-  box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+  box-shadow: 0 0 14px #00ffff, 0 0 28px #00ffff;
+  background: rgba(0,0,0,0.2); /* 透明度改成20% */
 }
 
 @keyframes softPulse {
@@ -79,7 +99,7 @@ html, body {
   50% { box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff; }
 }
 
-/* BOT 訊息：無光暈，純文字 */
+/* BOT 訊息 */
 .message.bot {
   background: rgba(0,0,0,0.1);
   border: 1px solid #444;
@@ -87,7 +107,7 @@ html, body {
   color: #ccc;
 }
 
-/* 特別事件：完整 pulse */
+/* 特別事件 */
 .message.highlight {
   background: rgba(0,0,0,0.1);
   border: 1px solid #ffd700;
@@ -101,11 +121,11 @@ html, body {
   50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
 }
 
-/* 名稱框：在訊息框外部左上角，有 glow 不閃爍 */
+/* 名稱框：外部左上角，字體加大10% */
 .username-box {
   position: absolute;
-  top: -22px;   /* 移到訊息框外部上方 */
-  left: 0;      /* 貼齊訊息框左邊 */
+  top: -22px;
+  left: 0;
   padding: 3px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -113,7 +133,7 @@ html, body {
   background: rgba(0,0,0,0.1);
   border: 1px solid #f5d76e;
   color: #f5d76e;
-  font-size: 0.72em;
+  font-size: 0.8em; /* 字體加大10% */
   text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
   box-shadow: 0 0 5px #f5d76e, 0 0 10px #f5d76e;
 }
@@ -145,6 +165,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
