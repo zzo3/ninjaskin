@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 奢華 Cyan</title>
+  <title>聊天室浮層 - 奢華 Cyan 強化版</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -18,7 +18,6 @@ html, body {
   color: #fff;
 }
 
-/* 提高層級，避免被覆蓋；暫時取消高度與裁切限制 */
 #chat-container {
   position: relative;
   z-index: 1000;
@@ -26,53 +25,75 @@ html, body {
   flex-direction: column;
   justify-content: flex-end;
   padding: 0 20px;
+  max-width: 400px;
   margin: 0 auto;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
-/* 保留簡單進場動畫 */
 .message-container {
   position: relative;
   margin-bottom: 6px;
   will-change: transform, opacity;
-  animation: fadeInScale 0.25s ease-out;
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.message-container.fadeout {
+  animation: floatUpFade 10s linear forwards;
 }
 
 @keyframes fadeInScale {
-  from { opacity: 0; transform: translateY(6px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
+  from { opacity: 0; transform: translateY(6px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 你的需求：5% 背景透明度、邊框 +50%（1.5px）、虹光 -50%、下邊緣留空與左右一致 */
+@keyframes floatUpFade {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
+}
+
+/* 訊息框樣式 */
 .message {
   display: inline-block;
   max-width: 100%;
-  background: rgba(0,0,0,0.05);
+  background: rgba(0,0,0,0.1); /* 10%透明度 */
   padding: 10px 8px 8px 8px;
   margin-top: 16px;
   border-radius: 8px;
   color: #fff;
   word-wrap: break-word;
   border: 1.5px solid #00ffff;
-  box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
-  font-size: 0.9em;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
+  font-size: 0.72em;
+  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
+  transition: box-shadow 0.3s ease;
+}
+
+.message:hover {
+  box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
 }
 
 .message.bot {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0,0,0,0.1);
   border: 1.5px solid #444;
-  box-shadow: 0 0 4px #222;
-  color: #ddd;
+  box-shadow: 0 0 8px #222;
+  color: #ccc;
 }
 
 .message.highlight {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0,0,0,0.1);
   border: 1.5px solid #ffd700;
-  box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700;
+  box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700;
   color: #ffd700;
+  animation: glowPulse 2s infinite;
 }
 
-/* 使用者名稱框 */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700; }
+  50% { box-shadow: 0 0 24px #ffd700, 0 0 40px #ffd700; }
+}
+
+/* 使用者名稱框：緊貼訊息框左上角 */
 .username-box {
   position: absolute;
   top: -18px;
@@ -81,25 +102,30 @@ html, body {
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,0,0.05);
+  background: rgba(0,0,0,0.1);
   border: 1.5px solid #f5d76e;
   color: #f5d76e;
-  font-size: 0.8em;
+  font-size: 0.72em;
+  text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
+  transition: box-shadow 0.3s ease;
 }
 
-/* 平台色（不加陰影，先簡化） */
-.username-box.twitch { border-color:#9146FF; color:#9146FF; }
-.username-box.youtube { border-color:#FF0000; color:#FF0000; }
-.username-box.kick { border-color:#00FF80; color:#00FF80; }
-.username-box.facebook { border-color:#3b5998; color:#3b5998; }
+.username-box:hover {
+  box-shadow: 0 0 16px currentColor, 0 0 32px currentColor;
+}
 
-/* 文字區塊 */
-.text { line-height: 1.45; word-break: break-word; }
-.donation { padding: 5px 10px; color: #ffd700; font-weight: 700; font-size: 0.85em; }
+.username-box.twitch { border-color:#9146FF; box-shadow:0 0 10px #9146FF,0 0 20px #9146FF; color:#9146FF; }
+.username-box.youtube { border-color:#FF0000; box-shadow:0 0 10px #FF0000,0 0 20px #FF0000; color:#FF0000; }
+.username-box.kick { border-color:#00FF80; box-shadow:0 0 10px #00FF80,0 0 20px #00FF80; color:#00FF80; }
+.username-box.facebook { border-color:#3b5998; box-shadow:0 0 10px #3b5998,0 0 20px #3b5998; color:#3b5998; }
+
+.text { line-height: 1.4; word-break: break-word; }
+.donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
 .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
