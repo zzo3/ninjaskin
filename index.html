@@ -26,29 +26,33 @@ body, html {
   max-width: 400px;
   margin: auto;
   max-height: 100vh;
-  overflow: hidden; /* 不顯示滾動條，訊息往上升直到消失 */
+  overflow: hidden;
 }
 
+/* 訊息框距離縮小到 3px */
 .message-container {
   position: relative;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   will-change: transform, opacity;
-  animation: floatUp linear forwards;
-  animation-duration: 30s; /* 30 秒持續往上升 */
+}
+
+/* idle 狀態觸發往上升動畫 */
+#chat-container.idle .message-container {
+  animation: floatUp 10s linear forwards;
 }
 
 @keyframes floatUp {
   from { transform: translateY(0); opacity: 1; }
-  to   { transform: translateY(-120vh); opacity: 0; } /* 超出背景後消失 */
+  to   { transform: translateY(-120vh); opacity: 0; }
 }
 
-/* 訊息框：漸層 Cyan */
+/* 訊息框樣式 */
 .message {
   display: inline-block;
   max-width: 100%;
   background: linear-gradient(145deg, rgba(0,255,255,0.2), rgba(0,255,255,0.5));
   padding: 10px 8px;
-  margin-top: 24px;
+  margin-top: 20px;
   border-radius: 8px;
   color: #fff;
   position: relative;
@@ -57,7 +61,7 @@ body, html {
   box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
   font-family: 'Noto Sans TC', sans-serif;
   font-size: 0.72em;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8); /* 增加立體感與陰影 */
+  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
 }
 
 /* BOT 訊息框 */
@@ -120,40 +124,48 @@ body, html {
 
 
 
-
 <body>
   <div id="chat-container"></div>
 
   <script>
-    // 讀取房間參數
     var urlParams = new URLSearchParams(window.location.search);
-    var roomID = "4DP7Stjuew";
+    var roomID = "4DP7Stjuew"; 
     if (urlParams.has("session")) {
       roomID = urlParams.get("session");
     }
-    var password = "false";
-    var featuredMode = false;
+    var password = "false"; 
+    var featuredMode = false; 
 
     const chatContainer = document.getElementById('chat-container');
+    let idleTimer = null;
 
+    // 重置 idle 計時器
+    function resetIdleTimer() {
+      chatContainer.classList.remove('idle');
+      if (idleTimer) clearTimeout(idleTimer);
+      // 30 秒沒有新訊息 → 加上 idle class
+      idleTimer = setTimeout(() => {
+        chatContainer.classList.add('idle');
+      }, 30000);
+    }
+
+    // 新增訊息到畫面
     function addMessageToOverlay(data) {
-      // 沒有使用者名稱且屬於系統訊息時跳過
       if (!data.chatname && data.meta) return;
 
-      // 建立容器與訊息元素
       const messageContainer = document.createElement('div');
       messageContainer.classList.add('message-container');
-
+      
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
       if (data.mid) messageDiv.id = data.mid;
 
-      // BOT 訊息樣式
+      // BOT 訊息
       if (data.type && data.type.toLowerCase().includes("bot")) {
         messageDiv.classList.add("bot");
       }
 
-      // 特別活動或打賞樣式（訂閱、贈訂、小奇點、combo、禮物、忠誠點數、追隨、donation）
+      // 特別活動或打賞訊息
       if (data.event) {
         const specialEvents = ["subscriber","gifted","bits","combo","gift","loyalty","donation","follower"];
         if (specialEvents.some(ev => data.event.toLowerCase().includes(ev))) {
@@ -171,7 +183,7 @@ body, html {
         else if (type.includes("facebook")) platformClass = "facebook";
       }
 
-      // 內容
+      // 訊息內容
       messageDiv.innerHTML = `
         <div class="username-box ${platformClass}">
           <span>${data.chatname || ''}</span>
@@ -182,14 +194,10 @@ body, html {
       `;
 
       messageContainer.appendChild(messageDiv);
-      chatContainer.appendChild(messageContainer); // 新訊息在底部顯示
+      chatContainer.appendChild(messageContainer);
 
-      // 動畫結束後移除 DOM（避免長時間累積）
-      messageContainer.addEventListener('animationend', (e) => {
-        if (e.animationName === 'floatUp') {
-          messageContainer.remove();
-        }
-      });
+      // 每次有新訊息 → 重置 idle 計時器
+      resetIdleTimer();
     }
 
     // 初始化 Social Stream Ninja iframe
@@ -213,3 +221,4 @@ body, html {
   </script>
 </body>
 </html>
+
