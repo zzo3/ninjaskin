@@ -117,12 +117,144 @@ html, body {
 <body>
   <div id="chat-container"></div>
 
-  <script>
-    var urlParams = new URLSearchParams(window.location.search);
-    var roomID = urlParams.has("session") ? urlParams.get("session") : "4DP7Stjuew";
-    var password = "false"; 
-    var featuredMode = false; 
+  <!-- 公告管理介面 -->
+  <div style="position:fixed; top:10px; right:10px; z-index:2000; background:#222; padding:10px; border-radius:8px; color:#fff; font-size:14px; width:340px;">
+    <h3 style="margin:0 0 8px 0;">公告管理</h3>
+    
+    <!-- 開關公告 -->
+    <button onclick="toggleAnnouncement(true)" style="padding:6px 12px; margin-right:5px;">開啟公告</button>
+    <button onclick="toggleAnnouncement(false)" style="padding:6px 12px;">關閉公告</button>
+    <br><br>
 
+    <!-- 下拉選單推送公告 -->
+    <label>選擇公告：</label>
+    <select id="announcementSelect" style="width:100%; margin-bottom:8px;"></select>
+    <button onclick="sendSelectedAnnouncement()" style="padding:6px 12px; width:100%; margin-bottom:10px;">立即推送</button>
+
+    <!-- 編輯公告 -->
+    <label>文字：</label><br>
+    <input id="msgText" type="text" style="width:100%;"><br>
+    <label>顏色 (Hex)：</label><br>
+    <input id="msgColor" type="text" value="#00ffff" style="width:100%;"><br>
+    <label>光暈：</label>
+    <input id="msgGlow" type="checkbox" checked><br>
+    <label>間隔 (毫秒)：</label><br>
+    <input id="msgInterval" type="number" value="300000" style="width:100%;"><br><br>
+
+    <!-- 三個平排按鈕 -->
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+      <button onclick="addAnnouncement()" style="flex:1; margin-right:5px; padding:6px;">新增</button>
+      <button onclick="updateAnnouncement()" style="flex:1; margin-right:5px; padding:6px;">修改</button>
+      <button onclick="deleteAnnouncement()" style="flex:1; padding:6px;">刪除</button>
+    </div>
+
+    <!-- 公告列表顯示 -->
+    <h4 style="margin:10px 0 5px 0;">公告列表</h4>
+    <div id="announcementList" style="max-height:220px; overflow-y:auto; background:#333; padding:5px; border-radius:5px;"></div>
+  </div>
+
+  <script>
+    /* ========= 可調整參數設定區 ========= */
+    let scheduledMessages = [
+      { text: "歡迎來到直播間！", color: "#00ffff", glow: true, interval: 300000 },
+      { text: "記得訂閱和按讚支持～", color: "#ff0000", glow: true, interval: 600000 },
+      { text: "加入會員享受更多福利！", color: "#00ff80", glow: false, interval: 900000 }
+    ];
+
+    const maxMessages = 50;
+    let autoAnnouncement = true;
+
+    function toggleAnnouncement(on) { autoAnnouncement = on; }
+
+    function sendAnnouncementNow(index = 0) {
+      if (index < 0 || index >= scheduledMessages.length) index = 0;
+      const msg = scheduledMessages[index];
+      addMessageToOverlay({
+        chatname: "系統公告",
+        chatmessage: msg.text,
+        type: "bot",
+        color: msg.color,
+        glow: msg.glow
+      });
+    }
+
+    function sendSelectedAnnouncement() {
+      const idx = document.getElementById("announcementSelect").value;
+      sendAnnouncementNow(parseInt(idx));
+    }
+
+    function updateAnnouncement() {
+      const idx = document.getElementById("announcementSelect").value;
+      scheduledMessages[idx] = {
+        text: document.getElementById("msgText").value,
+        color: document.getElementById("msgColor").value,
+        glow: document.getElementById("msgGlow").checked,
+        interval: parseInt(document.getElementById("msgInterval").value)
+      };
+      refreshAnnouncementSelect();
+    }
+
+    function addAnnouncement() {
+      scheduledMessages.push({
+        text: document.getElementById("msgText").value,
+        color: document.getElementById("msgColor").value,
+        glow: document.getElementById("msgGlow").checked,
+        interval: parseInt(document.getElementById("msgInterval").value)
+      });
+      refreshAnnouncementSelect();
+    }
+
+    function deleteAnnouncement() {
+      const idx = document.getElementById("announcementSelect").value;
+      if (scheduledMessages.length > 0) {
+        scheduledMessages.splice(idx, 1);
+        refreshAnnouncementSelect();
+      }
+    }
+
+    function deleteAnnouncementFromList(idx) {
+      scheduledMessages.splice(idx, 1);
+      refreshAnnouncementSelect();
+    }
+
+    function pushAnnouncementFromList(idx) {
+      sendAnnouncementNow(idx);
+    }
+
+    function refreshAnnouncementSelect() {
+      const select = document.getElementById("announcementSelect");
+      select.innerHTML = "";
+      scheduledMessages.forEach((msg, idx) => {
+        const option = document.createElement("option");
+        option.value = idx;
+        option.text = `${idx+1}. ${msg.text}`;
+        select.appendChild(option);
+      });
+      refreshAnnouncementList();
+    }
+
+    function refreshAnnouncementList() {
+      const list = document.getElementById("announcementList");
+      list.innerHTML = "";
+      scheduledMessages.forEach((msg, idx) => {
+        const item = document.createElement("div");
+        item.style.marginBottom = "8px";
+        item.style.padding = "5px";
+        item.style.borderBottom = "1px solid #555";
+        item.innerHTML = `
+          <strong>${idx+1}.</strong> ${msg.text} 
+          <br><span style="color:${msg.color};">顏色: ${msg.color}</span> 
+          | 光暈: ${msg.glow ? "是" : "否"} 
+          | 間隔: ${msg.interval}ms
+          <br>
+          <button onclick="pushAnnouncementFromList(${idx})" style="margin-top:5px; padding:4px 8px; margin-right:5px;">立即推送</button>
+          <button onclick="deleteAnnouncementFromList(${idx})" style="margin-top:5px; padding:4px 8px;">刪除</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    /* ========= 聊天訊息顯示邏輯 ========= */
     const chatContainer = document.getElementById('chat-container');
 
     function addMessageToOverlay(data) {
@@ -133,64 +265,41 @@ html, body {
 
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
-      if (data.mid) messageDiv.id = data.mid;
-
-      let platformClass = "";
-      if (data.type) {
-        const type = data.type.toLowerCase();
-        if (type.includes("twitch")) platformClass = "twitch";
-        else if (type.includes("youtube")) platformClass = "youtube";
-        else if (type.includes("kick")) platformClass = "kick";
-        else if (type.includes("facebook")) platformClass = "facebook";
-        else if (type.includes("bot")) platformClass = "bot";
-      }
-
-      let extraClass = "";
-      if (data.event) {
-        const specialEvents = ["subscriber","gifted","bits","combo","gift","loyalty","donation","follower"];
-        if (specialEvents.some(ev => data.event.toLowerCase().includes(ev))) {
-          extraClass = "highlight";
-        }
-      }
 
       messageDiv.innerHTML = `
-        <div class="username-box ${platformClass} ${extraClass}">
+        <div class="username-box bot">
           <span>${data.chatname || ''}</span>
-          <span class="badges"></span>
         </div>
         <div class="text">${data.chatmessage || ''}</div>
-        ${(data.donation || data.hasDonation) ? `<div class="donation">${(data.donation || data.hasDonation)}</div>` : ''}
       `;
+
+      if (data.type === "bot" && data.chatname === "系統公告") {
+        messageDiv.style.borderColor = data.color || "#ffffff";
+        messageDiv.style.color = data.color || "#ffffff";
+        if (data.glow) {
+          messageDiv.style.boxShadow = `0 0 8px ${data.color}, 0 0 16px ${data.color}`;
+        }
+      }
 
       messageContainer.appendChild(messageDiv);
       chatContainer.appendChild(messageContainer);
 
-      // 停留30秒 → 漸漸淡出10秒 → 保留在 DOM
-      setTimeout(() => {
-        messageContainer.classList.add('fadeout');
-      }, 30000);
+      setTimeout(() => { messageContainer.classList.add('fadeout'); }, 30000);
 
-      // ✅ 僅保留最近 50 條訊息
-      while (chatContainer.children.length > 50) {
+      while (chatContainer.children.length > maxMessages) {
         chatContainer.removeChild(chatContainer.firstChild);
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const iframe = document.createElement("iframe");
-      iframe.src = featuredMode
-        ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
-        : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+      refreshAnnouncementSelect();
 
-      iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
-      document.body.appendChild(iframe);
-
-      window.addEventListener("message", (event) => {
-        if (event.source !== iframe.contentWindow) return;
-        const payload = event.data && event.data.dataReceived;
-        if (payload && payload.overlayNinja) {
-          addMessageToOverlay(payload.overlayNinja);
-        }
+      // 啟動自動公告
+      scheduledMessages.forEach((msg, idx) => {
+        setInterval(() => {
+          if (!autoAnnouncement) return;
+          sendAnnouncementNow(idx);
+        }, msg.interval);
       });
     });
   </script>
