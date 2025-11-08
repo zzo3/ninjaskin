@@ -1,321 +1,235 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>Neon Overlay</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室浮層</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-    body, html {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: rgba(5, 5, 10, 0);
-        font-family: 'Roboto', sans-serif;
-        color: #e0e0ff;
-        font-size: 70%;
-    }
+        /* 全域設定：像素霓虹風格 + 背景透明度 20% */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Press Start 2P', cursive;
+            background: rgba(0, 0, 0, 0.2); /* 背景透明度 20% */
+            color: #fff;
+        }
 
-    #chat-container {
-        padding: 25px;
-        max-width: 420px;
-        height: 100%;
-        overflow-y: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        margin: auto;
-        scroll-behavior: smooth;
-    }
-    #chat-container::-webkit-scrollbar { display: none; }
+        /* 訊息容器動畫 */
+        .message-container {
+            position: relative;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
 
-    .message-container { position: relative; margin-bottom: 18px; }
+        .message-container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
 
-    .message {
-        display: inline-block;
-        max-width: 100%;
-        background: rgba(20,20,40,0.25);
-        border: 2px solid #00f0ff;
-        border-radius: 14px;
-        padding: 28px 14px 14px 14px;
-        margin-top: 28px;
-        margin-left: 20px;
-        color: #e0e0ff;
-        box-shadow: 0 0 12px #00f0ff, 0 0 24px #8000ff;
-        opacity: 0;
-        transform: translateX(-25px);
-        animation: neonSlideIn 0.7s ease forwards;
-        word-wrap: break-word;
-        transition: all 0.3s ease;
-    }
+        .message-container.removing {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
 
-    .username-box {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        position: absolute;
-        top: -24px;
-        left: 12px;
-        padding: 6px 12px;
-        font-weight: 600;
-        font-size: 100%;
-        background: rgba(0,0,0,0.4);
-        border: 1px solid #8000ff;
-        border-radius: 8px;
-        z-index: 2;
-    }
+        /* 使用者名稱框：基礎霓虹像素風格 */
+        .username-box {
+            display: flex;
+            position: absolute;
+            top: -19px;
+            left: 0px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: 600;
+            z-index: 2;
+            text-shadow: 0 0 6px rgba(255,255,255,0.8);
+            border: 2px solid #fff;
+        }
 
-    .username-box.twitch {
-        color: #9146FF;
-        border-color: #9146FF;
-        text-shadow: 0 0 8px #9146FF;
-    }
-    .username-box.youtube {
-        color: #FF0000;
-        border-color: #FF0000;
-        text-shadow: 0 0 8px #FF0000;
-    }
-    .username-box.kick {
-        color: #53FC18;
-        border-color: #53FC18;
-        text-shadow: 0 0 8px #53FC18;
-    }
+        /* Twitch 紫色霓虹 */
+        .username-box.twitch {
+            background: rgba(145, 70, 255, 0.2);
+            border-color: #9146FF;
+            box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
+            color: #fff;
+        }
 
-    .source-icon {
-        width: 25px;
-        height: 25px;
-        margin-right: 6px;
-        vertical-align: middle;
-        filter: drop-shadow(0 0 4px currentColor);
-    }
+        /* Kick 綠色霓虹 */
+        .username-box.kick {
+            background: rgba(0, 255, 128, 0.2);
+            border-color: #00FF80;
+            box-shadow: 0 0 10px #00FF80, 0 0 20px #00FF80;
+            color: #fff;
+        }
 
-    .message.bot {
-        border: 2px solid #555;
-        box-shadow: 0 0 8px #333;
-        background: rgba(20,20,20,0.25);
-        color: #aaa;
-    }
+        /* YouTube 紅色霓虹 */
+        .username-box.youtube {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #FF0000;
+            box-shadow: 0 0 10px #FF0000, 0 0 20px #FF0000;
+            color: #fff;
+        }
 
-    .event-message {
-        display: inline-block;
-        max-width: 100%;
-        background: rgba(10, 0, 20, 0.85);
-        border-radius: 16px;
-        padding: 20px;
-        margin: 20px auto;
-        font-weight: bold;
-        text-align: center;
-        border: 3px solid transparent;
-        background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)),
-                          linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff);
-        background-origin: border-box;
-        background-clip: content-box, border-box;
-        box-shadow: 0 0 20px #ff00ff, 0 0 40px #00f0ff;
-        opacity: 0;
-        transform: scale(0.9);
-        animation: neonEventIn 1s ease forwards, gradientShift 3s linear infinite;
-    }
-    .event-message span {
-        background: linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: textGradientShift 3s linear infinite;
-    }
+        /* Facebook 藍色霓虹 */
+        .username-box.facebook {
+            background: rgba(59, 89, 152, 0.2);
+            border-color: #3b5998;
+            box-shadow: 0 0 10px #3b5998, 0 0 20px #3b5998;
+            color: #fff;
+        }
 
-    .text { font-size: 100%; line-height: 1.5; }
+        /* 訊息框：霓虹邊框 + 背景透明度 20% */
+        .message {
+            display: inline-block;
+            max-height: 150px;
+            max-width: 100%;
+            background: rgba(25, 25, 25, 0.2);
+            padding: 24px 18px 18px 18px;
+            margin-top: 22px;
+            margin-left: 15px;
+            border-radius: 6px;
+            color: #fff;
+            position: relative;
+            word-wrap: break-word;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 8px #0ff, 0 0 16px #0ff;
+            font-family: 'Press Start 2P', cursive;
+        }
 
-    @keyframes neonSlideIn {
-        from { opacity: 0; transform: translateY(25px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes neonEventIn {
-        0% { opacity: 0; transform: scale(0.8); }
-        60% { opacity: 1; transform: scale(1.1); }
-        100% { transform: scale(1); }
-    }
-    @keyframes gradientShift {
-        0% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff); }
-        50% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #00f0ff, #ff00ff, #00f0ff); }
-        100% { background-image: linear-gradient(rgba(10,0,20,0.85), rgba(10,0,20,0.85)), linear-gradient(90deg, #ff00ff, #00f0ff, #ff00ff); }
-    }
-    @keyframes textGradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-  </style>
+        /* 訊息文字 */
+        .text {
+            font-size: clamp(0.85em, 2.5vw, 1em);
+            line-height: 1.4;
+            word-break: break-word;
+            text-shadow: 0 0 6px rgba(255,255,255,0.8);
+        }
+
+        /* 贊助/斗內顯示 */
+        .donation {
+            padding: 7px 18px 5px 18px;
+            color: #ffea00;
+            text-shadow: 0 0 6px #ffea00, 0 0 12px #ffea00;
+            font-weight: bold;
+        }
+
+        /* 徽章 */
+        .badge {
+            height: 1em;
+            vertical-align: middle;
+            margin-left: 0px;
+        }
+        .badges {
+            margin-left: 10px;
+        }
+
+        /* 聊天容器 */
+        #chat-container {
+            padding: 0;
+            max-width: 350px;
+            margin: auto;
+            max-height: 100vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #chat-container::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div id="chat-container"></div>
+    <div id="chat-container"></div>
 
-<script>
-  const chatContainer = document.getElementById('chat-container');
-  let lastSender = null;
-  let lastMessageDiv = null;
+    <script>
+    // Social Stream Ninja 參數設定
+    var urlParams = new URLSearchParams(window.location.search);
+    var roomID = "4DP7Stjuew"; // 預設房間 ID
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const roomID = urlParams.get("session") || "7RUWtGBfz2";
-  const password = "false";
-  const featuredMode = false;
-
-  function applyOverlaySize() {
-    const size = urlParams.get('size');
-    document.body.classList.remove("small-overlay", "large-overlay");
-    if (size === "small") document.body.classList.add("small-overlay");
-    else if (size === "large") document.body.classList.add("large-overlay");
-  }
-
-  function isFullyVisible(element) {
-    const containerRect = chatContainer.getBoundingClientRect();
-    const elementRect = element.getBoundingClientRect();
-    return elementRect.top >= containerRect.top && elementRect.bottom <= containerRect.bottom;
-  }
-
-  function removeCutOffMessages() {
-    let firstMessage = chatContainer.firstElementChild;
-    while (firstMessage && !isFullyVisible(firstMessage)) {
-      chatContainer.removeChild(firstMessage);
-      firstMessage = chatContainer.firstElementChild;
+    if (urlParams.has("session")) {
+        roomID = urlParams.get("session");
     }
-  }
+    var password = "false"; 
+    var featuredMode = false; 
 
-  function autoScroll() {
-    const lastMessage = chatContainer.lastElementChild;
-    if (lastMessage) {
-      lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
-      setTimeout(() => {
-        lastMessage.scrollIntoView({ behavior: "instant", block: "end" });
-        removeCutOffMessages();
-      }, 50);
-    }
-  }
+    const chatContainer = document.getElementById('chat-container');
 
-  const observer = new MutationObserver(autoScroll);
-  observer.observe(chatContainer, { childList: true, subtree: true });
+    const SHOWTIME = (() => {
+        const v = parseInt(urlParams.get('showtime') || '30000');
+        return isNaN(v) ? 30000 : v;
+    })();
 
-  // 事件訊息
-  function addEventToOverlay(data) {
-    const eventDiv = document.createElement('div');
-    eventDiv.classList.add('event-message');
-    let eventText = '';
-    if (data.type === 'follow') eventText = `${data.chatname} just followed!`;
-    else if (data.type === 'subscription') eventText = `${data.chatname} subscribed!`;
-    else if (data.type === 'donation') eventText = `${data.chatname} donated ${data.amount || ''}!`;
-    eventDiv.innerHTML = `<span>🎉 ${eventText} 🎉</span>`;
-    chatContainer.appendChild(eventDiv);
-  }
-
-  // 聊天訊息
-  function addMessageToOverlay(data) {
-    if (!data || !data.chatname || !data.chatmessage) return;
-    if (['follow','subscription','donation'].includes(data.type)) {
-      addEventToOverlay(data);
-      return;
-    }
-
-    if (lastSender === data.chatname && lastMessageDiv) {
-      const textDiv = document.createElement('div');
-      textDiv.classList.add('text');
-      textDiv.innerHTML = data.chatmessage;
-      lastMessageDiv.querySelector('.message').appendChild(textDiv);
-    } else {
-      const messageContainer = document.createElement('div');
-      messageContainer.classList.add('message-container');
-
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message');
-      if (data.type === 'bot') messageDiv.classList.add('bot');
-
-      // 平台 icon
-      let sourceIcon = '';
-      if (data.type && data.type !== 'bot') {
-        const providerName = data.type.charAt(0).toUpperCase() + data.type.slice(1);
-        const iconUrl = `https://socialstream.ninja/sources/images/${data.type}.png`;
-        sourceIcon = `<img src="${iconUrl}" alt="${providerName}" class="source-icon" onerror="this.remove();">`;
-      }
-
-      // 徽章
-      let chatbadges = "";
-      if (data.chatbadges) {
-        data.chatbadges.slice(0, 1).forEach(badge => {
-          if (badge.type === "img" && badge.src) {
-            chatbadges += `<img class='badge' src='${badge.src}' />`;
-          } else if (badge.type === "svg" && badge.html) {
-            chatbadges += `<span class='badge svg'>${badge.html}</span>`;
-          }
-        });
-      }
-
-      messageDiv.innerHTML = `
-        <div class="username-box ${data.type || ''}">
-          ${sourceIcon}
-          <span>${data.chatname}</span>
-          <span class="badges">${chatbadges}</span>
-        </div>
-        <div class="text">${data.chatmessage}</div>
-      `;
-
-      messageContainer.appendChild(messageDiv);
-      chatContainer.appendChild(messageContainer);
-
-      lastSender = data.chatname;
-      lastMessageDiv = messageContainer;
-    }
-  }
-
-  // iframe 連接
-  const iframe = document.createElement("iframe");
-  iframe.src = featuredMode
-    ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
-    : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
-  iframe.style.cssText = "width:0;height:0;position:fixed;left:-100px;top:-100px;";
-  document.body.appendChild(iframe);
-
-  window.addEventListener("message", (event) => {
-    if (event.source !== iframe.contentWindow) return;
-    if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
-      addMessageToOverlay(event.data.dataReceived.overlayNinja);
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', applyOverlaySize);
-
-  // WebSocket 連接
-  let conCon = 1;
-  let socketserver = false;
-  let serverURL = urlParams.has("localserver") ? "ws://127.0.0.1:3000" : "wss://io.socialstream.ninja";
-
-  function setupSocket() {
-    socketserver.onclose = function () {
-      setTimeout(function () {
-        conCon += 1;
-        socketserver = new WebSocket(serverURL);
-        setupSocket();
-      }, 100 * conCon);
-    };
-    socketserver.onopen = function () {
-      conCon = 1;
-      socketserver.send(JSON.stringify({ "join": roomID, "out": 3, "in": 4 }));
-    };
-    socketserver.addEventListener('message', function (event) {
-      if (event.data) {
-        const data = JSON.parse(event.data);
-        addMessageToOverlay(data);
-        if (data.get) {
-          socketserver.send(JSON.stringify({ callback: { get: data.get, result: true } }));
+    // 新增訊息到浮層
+    function addMessageToOverlay(data) {
+        if (!data.chatname && data.meta) {
+            return;
         }
-      }
-    });
-  }
 
-  if (urlParams.has("server") || urlParams.has("server2")) {
-    serverURL = urlParams.get("server") || urlParams.get("server2") || serverURL;
-    socketserver = new WebSocket(serverURL);
-    setupSocket();
-  }
-</script>
-</body>
-</html>
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        if (data.mid) messageDiv.id = data.mid;
 
+        // 判斷平台並加上對應 class
+        let platformClass = "";
+        if (data.type) {
+            const type = data.type.toLowerCase();
+            if (type.includes("twitch")) platformClass = "twitch";
+            else if (type.includes("youtube")) platformClass = "youtube";
+            else if (type.includes("kick")) platformClass = "kick";
+            else if (type.includes("facebook")) platformClass = "facebook";
+        }
+
+        let chatbadges = "";
+        if (data.chatbadges) {
+            data.chatbadges.slice(0, 2).forEach(badge => {
+                if (typeof badge === "object") {
+                    if (badge.type === "img" && badge.src) {
+                        chatbadges += `<img class='badge' src='${badge.src}' />`;
+                    } else if (badge.type === "svg" && badge.html) {
+                        chatbadges += `<span class='badge svg'>${badge.html}</span>`;
+                    }
+                } else {
+                    chatbadges += `<img class='badge' src='${badge}' />`;
+                }
+            });
+        }
+
+        messageDiv.innerHTML = `
+            ${data.chatimg ? `<div class="avatar-wrapper"><div class="avatar" style="background-image: url('${data.chatimg}');"></div></div>` : ''}
+            <div class="username-box ${platformClass}">
+                <span>${data.chatname}</span>
+                <span class="badges">${chatbadges}</span>
+            </div>
+            <div class="text">${data.chatmessage || ''}</div>
+            ${(data.donation||data.hasDonation) ? `<div class="donation">${(data.donation||data.hasDonation)}</div>` : ''}
+        `;
+
+        messageContainer.appendChild(messageDiv);
+        
+        const isAtBottom = chatContainer.scrollHeight - chatContainer.scrollTop <= chatContainer.clientHeight + 1;
+        chatContainer.appendChild(messageContainer);
+
+        messageContainer.offsetHeight;
+        
+        requestAnimationFrame(() => {
+            messageContainer.classList.add('visible');
+        });
+
+        if (isAtBottom) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        if (SHOWTIME > 0) {
+            setTimeout(() => {
+                messageContainer.classList.add('removing');
+                setTimeout(() => {
+                    if (messageContainer.parentNode) {
