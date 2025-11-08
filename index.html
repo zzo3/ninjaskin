@@ -113,11 +113,19 @@ body, html {
 </head>
 
 
-
 <body>
   <div id="chat-container"></div>
 
   <script>
+    // 房間設定
+    var urlParams = new URLSearchParams(window.location.search);
+    var roomID = "4DP7Stjuew"; 
+    if (urlParams.has("session")) {
+      roomID = urlParams.get("session");
+    }
+    var password = "false"; 
+    var featuredMode = false; 
+
     const chatContainer = document.getElementById('chat-container');
     let idleTimer = null;
 
@@ -143,6 +151,8 @@ body, html {
 
     // 新增訊息到畫面
     function addMessageToOverlay(data) {
+      console.log("新增訊息:", data); // debug log
+
       if (!data.chatname && data.meta) return;
 
       const messageContainer = document.createElement('div');
@@ -195,11 +205,15 @@ body, html {
     // 初始化 Social Stream Ninja iframe
     document.addEventListener('DOMContentLoaded', () => {
       const iframe = document.createElement("iframe");
-      iframe.src = `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=false&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=4DP7Stjuew`;
+      iframe.src = featuredMode
+        ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+        : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+
       iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
       document.body.appendChild(iframe);
 
       window.addEventListener("message", (event) => {
+        console.log("收到事件:", event.data); // debug log
         if (event.source !== iframe.contentWindow) return;
         const payload = event.data && event.data.dataReceived;
         if (payload && payload.overlayNinja) {
