@@ -13,13 +13,14 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: 'Noto Sans TC', sans-serif;
-  background: transparent; /* 完全透明背景 */
+  background: transparent;
   color: #fff;
 }
 
 #chat-container {
   display: flex;
-  flex-direction: column-reverse; /* 新訊息由下至上 */
+  flex-direction: column;
+  justify-content: flex-end; /* 新訊息由下往上 */
   padding: 0;
   max-width: 400px;
   margin: auto;
@@ -28,34 +29,36 @@ body, html {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-#chat-container::-webkit-scrollbar {
-  display: none;
-}
+#chat-container::-webkit-scrollbar { display: none; }
 
 .message-container {
   position: relative;
-  margin-bottom: 6px; /* 原本 12px → 縮小 50% */
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  margin-bottom: 5px; /* 原本 12px → 6px → 再縮小 20% ≈ 5px */
+  will-change: opacity, transform;
 }
 .message-container.visible {
-  opacity: 1;
-  transform: translateY(0);
+  animation: fadeInUp 220ms ease-out forwards;
 }
 .message-container.removing {
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  animation: fadeOutUp 300ms ease-in forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
 }
 
 /* 訊息框：漸層 Cyan */
 .message {
   display: inline-block;
   max-width: 100%;
-  background: linear-gradient(145deg, rgba(0,255,255,0.2), rgba(0,255,255,0.6));
-  padding: 10px 8px; /* 減少空位 */
-  margin-top: 28px;
+  background: linear-gradient(145deg, rgba(0,255,255,0.2), rgba(0,255,255,0.5)); /* 更透明 10% */
+  padding: 10px 8px;
+  margin-top: 24px;
   border-radius: 8px;
   color: #fff;
   position: relative;
@@ -63,12 +66,12 @@ body, html {
   border: 2px solid #00ffff;
   box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
   font-family: 'Noto Sans TC', sans-serif;
-  font-size: 0.9em; /* 字體縮小 10% */
+  font-size: 0.9em;
 }
 
 /* BOT 訊息框 */
 .message.bot {
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.7); /* 更透明 10% */
   border: 2px solid #444;
   box-shadow: 0 0 8px #222;
   color: #ccc;
@@ -81,43 +84,27 @@ body, html {
   color: #ffd700;
 }
 
-/* 使用者名稱框：緊貼訊息框左上角 */
+/* 使用者名稱框 */
 .username-box {
   position: absolute;
   top: -18px;
   left: 8px;
-  padding: 3px 6px; /* 減少 50% 空位 */
+  padding: 3px 6px;
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.5); /* 更透明 10% */
   border: 1px solid #f5d76e;
   color: #f5d76e;
   text-shadow: 0 0 6px #f5d76e, 0 0 12px #f5d76e;
-  font-size: 0.8em; /* 字體縮小 10% */
+  font-size: 0.8em;
 }
 
 /* 不同平台霓虹色 */
-.username-box.twitch {
-  border-color: #9146FF;
-  box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
-  color: #9146FF;
-}
-.username-box.youtube {
-  border-color: #FF0000;
-  box-shadow: 0 0 10px #FF0000, 0 0 20px #FF0000;
-  color: #FF0000;
-}
-.username-box.kick {
-  border-color: #00FF80;
-  box-shadow: 0 0 10px #00FF80, 0 0 20px #00FF80;
-  color: #00FF80;
-}
-.username-box.facebook {
-  border-color: #3b5998;
-  box-shadow: 0 0 10px #3b5998, 0 0 20px #3b5998;
-  color: #3b5998;
-}
+.username-box.twitch { border-color:#9146FF; box-shadow:0 0 10px #9146FF,0 0 20px #9146FF; color:#9146FF; }
+.username-box.youtube { border-color:#FF0000; box-shadow:0 0 10px #FF0000,0 0 20px #FF0000; color:#FF0000; }
+.username-box.kick { border-color:#00FF80; box-shadow:0 0 10px #00FF80,0 0 20px #00FF80; color:#00FF80; }
+.username-box.facebook { border-color:#3b5998; box-shadow:0 0 10px #3b5998,0 0 20px #3b5998; color:#3b5998; }
 
 .text {
   line-height: 1.4;
@@ -133,14 +120,8 @@ body, html {
   font-size: 0.9em;
 }
 
-.badge {
-  height: 1em;
-  vertical-align: middle;
-  margin-left: 4px;
-}
-.badges {
-  margin-left: 6px;
-}
+.badge { height: 1em; vertical-align: middle; margin-left: 4px; }
+.badges { margin-left: 6px; }
   </style>
 </head>
 
@@ -202,9 +183,8 @@ body, html {
       `;
 
       messageContainer.appendChild(messageDiv);
-      chatContainer.prepend(messageContainer); // 新訊息在底部，舊訊息往上推
+      chatContainer.appendChild(messageContainer); // 新訊息在底部
 
-      messageContainer.offsetHeight;
       requestAnimationFrame(() => {
         messageContainer.classList.add('visible');
       });
@@ -216,7 +196,7 @@ body, html {
             if (messageContainer.parentNode) {
               messageContainer.parentNode.removeChild(messageContainer);
             }
-          }, 500);
+          }, 300);
         }, SHOWTIME);
       }
     }
@@ -236,9 +216,9 @@ body, html {
         if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
           addMessageToOverlay(event.data.dataReceived.overlayNinja);
         }
-     
       });
     });
   </script>
 </body>
 </html>
+
