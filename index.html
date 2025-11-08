@@ -14,7 +14,7 @@ body, html {
   width: 100%;
   height: 100%;
   font-family: 'Noto Sans TC', sans-serif;
-  background: transparent; /* 背景全透明 */
+  background: transparent;
   color: #fff;
 }
 
@@ -22,22 +22,20 @@ body, html {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 20px; /* 左右留出 20px 空間 */
+  padding: 0 20px;
   max-width: 400px;
   margin: auto;
   max-height: 100vh;
   overflow: hidden;
 }
 
-/* 訊息框距離縮小到 3px */
 .message-container {
   position: relative;
   margin-bottom: 3px;
   will-change: transform, opacity;
-  animation: fadeInScale 0.4s ease-out; /* 出現動畫 */
+  animation: fadeInScale 0.4s ease-out;
 }
 
-/* idle 狀態觸發往上升動畫 */
 .message-container.fadeout {
   animation: floatUpFade 10s linear forwards;
 }
@@ -52,39 +50,34 @@ body, html {
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
 }
 
-/* 訊息框樣式：全透明背景 + 邊框厚度 1px */
+/* 全透明訊息框 + 邊框厚度 1px */
 .message {
   display: inline-block;
   max-width: 100%;
-  background: transparent; /* 全透明 */
+  background: transparent;
   padding: 10px 8px;
   margin-top: 20px;
   border-radius: 8px;
   color: #fff;
   position: relative;
   word-wrap: break-word;
-  border: 1px solid #00ffff; /* 邊框厚度減半 */
+  border: 1px solid #00ffff;
   box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
-  font-family: 'Noto Sans TC', sans-serif;
   font-size: 0.72em;
   text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
 }
 
-/* BOT 訊息框 */
 .message.bot {
-  background: transparent; /* 全透明 */
+  background: transparent;
   border: 1px solid #444;
   box-shadow: 0 0 8px #222;
   color: #ccc;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.6);
 }
 
-/* 特別活動或打賞訊息框發光 */
 .message.highlight {
   box-shadow: 0 0 16px #ffd700, 0 0 32px #ffd700;
   border: 1px solid #ffd700;
   color: #ffd700;
-  text-shadow: 1px 1px 2px #000, 0 0 8px #ffd700;
   animation: glowPulse 2s infinite;
 }
 
@@ -93,7 +86,6 @@ body, html {
   50% { box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700; }
 }
 
-/* 使用者名稱框 */
 .username-box {
   position: absolute;
   top: -18px;
@@ -102,38 +94,23 @@ body, html {
   border-radius: 4px;
   font-weight: 600;
   z-index: 2;
-  background: transparent; /* 全透明 */
-  border: 1px solid #f5d76e; /* 邊框厚度減半 */
+  background: transparent;
+  border: 1px solid #f5d76e;
   color: #f5d76e;
-  text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
   font-size: 0.72em;
 }
 
-/* 不同平台霓虹色 */
-.username-box.twitch { border-color:#9146FF; box-shadow:0 0 10px #9146FF,0 0 20px #9146FF; color:#9146FF; text-shadow:1px 1px 2px #000,0 0 6px #9146FF; }
-.username-box.youtube { border-color:#FF0000; box-shadow:0 0 10px #FF0000,0 0 20px #FF0000; color:#FF0000; text-shadow:1px 1px 2px #000,0 0 6px #FF0000; }
-.username-box.kick { border-color:#00FF80; box-shadow:0 0 10px #00FF80,0 0 20px #00FF80; color:#00FF80; text-shadow:1px 1px 2px #000,0 0 6px #00FF80; }
-.username-box.facebook { border-color:#3b5998; box-shadow:0 0 10px #3b5998,0 0 20px #3b5998; color:#3b5998; text-shadow:1px 1px 2px #000,0 0 6px #3b5998; }
+.username-box.twitch { border-color:#9146FF; color:#9146FF; }
+.username-box.youtube { border-color:#FF0000; color:#FF0000; }
+.username-box.kick { border-color:#00FF80; color:#00FF80; }
+.username-box.facebook { border-color:#3b5998; color:#3b5998; }
 
-.text {
-  line-height: 1.4;
-  word-break: break-word;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
-}
-
-.donation {
-  padding: 5px 10px;
-  color: #ffd700;
-  text-shadow: 1px 1px 2px #000, 0 0 8px #ffd700;
-  font-weight: bold;
-  font-size: 0.72em;
-}
-
+.text { line-height: 1.4; word-break: break-word; }
+.donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
 .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
 .badges { margin-left: 6px; }
   </style>
 </head>
-
 
 
 <body>
@@ -156,16 +133,19 @@ body, html {
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
         triggerIdleFadeOut();
-      }, 30000); // 30 秒沒有新訊息 → 舊訊息開始消失
+      }, 30000);
     }
 
-    // idle 狀態觸發舊訊息消失
+    // idle 狀態觸發舊訊息消失 + 清空 DOM
     function triggerIdleFadeOut() {
       const messages = chatContainer.querySelectorAll('.message-container');
       messages.forEach(msg => {
         msg.classList.add('fadeout');
-        msg.addEventListener('animationend', () => msg.remove());
       });
+      // 在動畫結束後清空所有訊息
+      setTimeout(() => {
+        chatContainer.innerHTML = "";
+      }, 10000); // 與動畫時間一致 (10s)
     }
 
     // 新增訊息到畫面
@@ -179,12 +159,10 @@ body, html {
       messageDiv.classList.add('message');
       if (data.mid) messageDiv.id = data.mid;
 
-      // BOT 訊息
       if (data.type && data.type.toLowerCase().includes("bot")) {
         messageDiv.classList.add("bot");
       }
 
-      // 特別活動或打賞訊息
       if (data.event) {
         const specialEvents = ["subscriber","gifted","bits","combo","gift","loyalty","donation","follower"];
         if (specialEvents.some(ev => data.event.toLowerCase().includes(ev))) {
@@ -192,7 +170,6 @@ body, html {
         }
       }
 
-      // 平台樣式
       let platformClass = "";
       if (data.type) {
         const type = data.type.toLowerCase();
@@ -202,7 +179,6 @@ body, html {
         else if (type.includes("facebook")) platformClass = "facebook";
       }
 
-      // 訊息內容
       messageDiv.innerHTML = `
         <div class="username-box ${platformClass}">
           <span>${data.chatname || ''}</span>
