@@ -31,7 +31,7 @@ html, body {
   overflow-y: auto;
 }
 
-/* 美化滾輪：支援 Chrome / Brave / Edge */
+/* 美化滾輪 */
 #chat-container::-webkit-scrollbar {
   width: 8px;
 }
@@ -45,40 +45,46 @@ html, body {
 #chat-container::-webkit-scrollbar-track {
   background: rgba(0,255,255,0.15);
 }
-
-/* Firefox 支援 */
 #chat-container {
   scrollbar-width: thin;
   scrollbar-color: #00ffff rgba(0,255,255,0.15);
 }
 
+/* 訊息容器 */
 .message-container {
   position: relative;
   margin-bottom: 33px; /* 訊息框之間留5px */
   will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
-
 .message-container.fadeout {
-  animation: floatUpFade 30s ease-out forwards;
+  animation: floatUpFade 10s ease-out forwards;
+  animation-delay: 30s; /* 停留30秒再淡出 */
   animation-play-state: running;
 }
-
 .message-container.fadeout:hover {
   animation-play-state: paused;
 }
 
+/* 動畫 */
 @keyframes fadeInScale {
   from { opacity: 0; transform: translateY(6px) scale(0.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 @keyframes floatUpFade {
   from { transform: translateY(0) scale(1); opacity: 1; }
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
 }
+@keyframes softPulse {
+  0%, 100% { box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff; }
+  50% { box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff; }
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; }
+  50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
+}
 
-/* 一般訊息 */
+/* 訊息框 */
 .message {
   position: relative;
   display: inline-block;
@@ -86,7 +92,7 @@ html, body {
   background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,0,0,0.2));
   background-clip: padding-box;
   padding: 8px;
-  border-radius: 10px; /* 改成10px圓角 */
+  border-radius: 10px;
   color: #fff;
   word-wrap: break-word;
   border: 1px solid #00ffff;
@@ -96,16 +102,10 @@ html, body {
   transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
   animation: softPulse 4s infinite;
 }
-
 .message:hover {
   box-shadow: 0 0 14px #00ffff, 0 0 28px #00ffff;
   background: rgba(0,0,0,0.2);
   transform: scale(1.03);
-}
-
-@keyframes softPulse {
-  0%, 100% { box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff; }
-  50% { box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff; }
 }
 
 /* BOT 訊息 */
@@ -125,18 +125,13 @@ html, body {
   animation: glowPulse 2s infinite;
 }
 
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700; }
-  50% { box-shadow: 0 0 12px #ffd700, 0 0 20px #ffd700; }
-}
-
-/* 名稱框：與訊息框留3px空間，圓角一致 */
+/* 名稱框 */
 .username-box {
   position: absolute;
-  top: -27px;
+  top: -27px; /* 與訊息框留3px */
   left: 0;
   padding: 3px 6px;
-  border-radius: 10px; /* 改成10px圓角 */
+  border-radius: 10px; /* 圓角一致 */
   font-weight: 600;
   z-index: 2;
   background: rgba(0,0,0,0.1);
@@ -145,9 +140,8 @@ html, body {
   font-size: 0.85em; /* 名稱字體加大 */
   text-shadow: 1px 1px 2px #000, 0 0 6px #f5d76e;
   box-shadow: 0 0 5px #f5d76e, 0 0 10px #f5d76e;
+  overflow: hidden; /* 確保圓角生效 */
 }
-
-/* 名稱框漸層邊框 */
 .username-box.twitch {
   border: 1px solid transparent;
   border-image: linear-gradient(90deg, #9146FF, #6a30cc) 1;
@@ -199,27 +193,6 @@ html, body {
     var featuredMode = false; 
 
     const chatContainer = document.getElementById('chat-container');
-    let idleTimer = null;
-
-    // 重置 idle 計時器
-    function resetIdleTimer() {
-      if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        triggerIdleFadeOut();
-      }, 30000); // 30 秒沒有新訊息 → 舊訊息開始消失
-    }
-
-    // idle 狀態觸發舊訊息消失 + 清空 DOM
-    function triggerIdleFadeOut() {
-      const messages = chatContainer.querySelectorAll('.message-container');
-      messages.forEach(msg => {
-        msg.classList.add('fadeout');
-      });
-      // 在動畫結束後清空所有訊息
-      setTimeout(() => {
-        chatContainer.innerHTML = "";
-      }, 10000); // 與動畫時間一致 (10s)
-    }
 
     // 新增訊息到畫面
     function addMessageToOverlay(data) {
@@ -229,7 +202,7 @@ html, body {
 
       const messageContainer = document.createElement('div');
       messageContainer.classList.add('message-container');
-      
+
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
       if (data.mid) messageDiv.id = data.mid;
@@ -270,8 +243,18 @@ html, body {
       messageContainer.appendChild(messageDiv);
       chatContainer.appendChild(messageContainer);
 
-      // 每次有新訊息 → 重置 idle 計時器
-      resetIdleTimer();
+      // 最多保留10條訊息
+      while (chatContainer.children.length > 10) {
+        chatContainer.removeChild(chatContainer.firstChild);
+      }
+
+      // 每則訊息：停留30秒 → 淡出10秒 → 移除
+      setTimeout(() => {
+        messageContainer.classList.add('fadeout');
+        setTimeout(() => {
+          messageContainer.remove();
+        }, 10000);
+      }, 30000);
     }
 
     // 初始化 Social Stream Ninja iframe
