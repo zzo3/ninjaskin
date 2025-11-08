@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 - 黑底火焰邊框</title>
+  <title>聊天室浮層 - 平台火焰邊框</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
@@ -34,12 +34,10 @@ html, body {
 .message-container {
   position: relative;
   margin-bottom: 28px;
-  will-change: transform, opacity;
   animation: fadeInScale 0.4s ease-out;
 }
 .message-container.fadeout {
   animation: floatUpFade 30s linear forwards;
-  animation-play-state: running;
 }
 .message-container.fadeout:hover {
   animation-play-state: paused;
@@ -53,76 +51,78 @@ html, body {
   from { transform: translateY(0) scale(1); opacity: 1; }
   to   { transform: translateY(-120vh) scale(0.95); opacity: 0; }
 }
-
-/* 一般訊息：黑底 + 流動火焰邊框 */
-.message {
-  position: relative;
-  display: inline-block;
-  max-width: 100%;
-  background: rgba(0,0,0,1); /* 全黑 */
-  padding: 8px;
-  border-radius: 8px;
-  color: rgba(255,255,255,0.9); /* 文字90%不透明度 */
-  word-wrap: break-word;
-  border: 6px solid transparent; /* 邊框加粗20% (原3px → 6px) */
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image: 
-    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)), 
-    linear-gradient(270deg, #0000FF, #1E90FF, #00BFFF, #70C9FB);
-  background-size: 100% 100%, 400% 400%;
-  animation: borderFlame 8s linear infinite;
-  font-size: 0.72em;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(173,216,230,0.8);
-  transition: opacity 0.3s ease, box-shadow 0.3s ease;
-  opacity: 0.1; /* 預設透明度10% */
-}
-.message:hover {
-  opacity: 0.2; /* 滑鼠移過去透明度20% */
-  box-shadow: 0 0 14px #00BFFF, 0 0 28px #70C9FB;
-}
-
 @keyframes borderFlame {
   0% { background-position: 0% 50%, 0% 50%; }
   100% { background-position: 0% 50%, 100% 50%; }
 }
 
-/* BOT 訊息 */
-.message.bot {
+/* 基本訊息框：黑底 + 文字90%透明度 + 整體90%不透明 */
+.message {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
   background: rgba(0,0,0,1);
-  border: 6px solid transparent;
+  padding: 8px;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.9);
+  word-wrap: break-word;
+  border: 4px solid transparent; /* 邊框減30% */
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;
-  background-image: 
-    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)), 
-    linear-gradient(270deg, #0000FF, #1E90FF, #00BFFF, #70C9FB);
+  font-size: 0.72em;
+  text-shadow: 1px 1px 2px #000;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+  opacity: 0.9;
+}
+.message:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 14px currentColor, 0 0 28px currentColor;
+}
+
+/* 各平台邊框火焰效果 */
+.message.twitch {
+  background-image:
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)),
+    linear-gradient(270deg, #9146FF, #b07aff, #9146FF);
   background-size: 100% 100%, 400% 400%;
   animation: borderFlame 8s linear infinite;
-  color: rgba(200,200,200,0.9);
-  opacity: 0.1;
+  color: #9146FF;
 }
-.message.bot:hover {
-  opacity: 0.2;
+.message.youtube {
+  background-image:
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)),
+    linear-gradient(270deg, #FF0000, #ff6666, #FF0000);
+  background-size: 100% 100%, 400% 400%;
+  animation: borderFlame 8s linear infinite;
+  color: #FF0000;
+}
+.message.kick {
+  background-image:
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)),
+    linear-gradient(270deg, #00FF80, #66ffb2, #00FF80);
+  background-size: 100% 100%, 400% 400%;
+  animation: borderFlame 8s linear infinite;
+  color: #00FF80;
+}
+.message.facebook {
+  background-image:
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)),
+    linear-gradient(270deg, #3b5998, #6d84c4, #3b5998);
+  background-size: 100% 100%, 400% 400%;
+  animation: borderFlame 8s linear infinite;
+  color: #3b5998;
 }
 
 /* 特別事件 */
 .message.highlight {
-  background: rgba(0,0,0,1);
-  border: 6px solid transparent;
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image: 
-    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)), 
-    linear-gradient(270deg, #0000FF, #1E90FF, #00BFFF, #70C9FB);
+  background-image:
+    linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1)),
+    linear-gradient(270deg, #00BFFF, #70C9FB, #00BFFF);
   background-size: 100% 100%, 400% 400%;
   animation: borderFlame 6s linear infinite, glowPulse 2s infinite;
   color: rgba(112,201,251,0.9);
-  opacity: 0.1;
+  opacity: 0.9;
 }
-.message.highlight:hover {
-  opacity: 0.2;
-}
-
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 8px #00BFFF, 0 0 16px #70C9FB; }
   50% { box-shadow: 0 0 12px #70C9FB, 0 0 24px #ADD8E6; }
@@ -138,12 +138,14 @@ html, body {
   font-weight: 600;
   z-index: 2;
   background: rgba(0,0,0,0.8);
-  border: 1px solid #00BFFF;
-  color: #00BFFF;
+  border: 1px solid currentColor;
   font-size: 0.8em;
-  text-shadow: 1px 1px 2px #000, 0 0 6px #70C9FB;
-  box-shadow: 0 0 5px #1E90FF, 0 0 10px #00BFFF;
+  text-shadow: 1px 1px 2px #000;
 }
+.username-box.twitch { color:#9146FF; }
+.username-box.youtube { color:#FF0000; }
+.username-box.kick { color:#00FF80; }
+.username-box.facebook { color:#3b5998; }
 
 .text { line-height: 1.4; word-break: break-word; }
 .donation { padding: 5px 10px; color: rgba(112,201,251,0.9); font-weight: bold; font-size: 0.72em; }
@@ -151,6 +153,7 @@ html, body {
 .badges { margin-left: 6px; }
   </style>
 </head>
+
 
 
 
