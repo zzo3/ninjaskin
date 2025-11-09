@@ -258,97 +258,115 @@
 </body>
 
   <div id="chat-container"></div>
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomID = urlParams.get("session") || "4DP7Stjuew";
-    const password = "false";
-    const featuredMode = false;
-    const chatContainer = document.getElementById('chat-container');
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomID = urlParams.get("session") || "4DP7Stjuew";
+  const password = "false";
+  const featuredMode = false;
+  const chatContainer = document.getElementById('chat-container');
 
-    const SHOWTIME = (() => {
-      const v = parseInt(urlParams.get('showtime') || '30000');
-      return isNaN(v) ? 30000 : v;
-    })();
+  function addMessageToOverlay(data) {
+    if (!data.chatname && data.meta) return;
 
-    function addMessageToOverlay(data) {
-      if (!data.chatname && data.meta) return;
+    const messageContainer = document.createElement('div');
+    messageContainer.classList.add('message-container');
 
-      const messageContainer = document.createElement('div');
-      messageContainer.classList.add('message-container', 'fadeout');
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    if (data.mid) messageDiv.id = data.mid;
 
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message');
-      if (data.mid) messageDiv.id = data.mid;
-
-      const usernameBox = document.createElement('div');
-      usernameBox.classList.add('username-box');
-      const platformClass = data.type?.toLowerCase() || '';
-      if (["youtube", "twitch", "kick", "system"].includes(platformClass)) {
-        usernameBox.classList.add(platformClass);
-      }
-
-      const platformEmoji = {
-        youtube: "❤️",
-        kick: "💚",
-        twitch: "💜"
-      };
-      const emoji = platformEmoji[platformClass] || "";
-      usernameBox.innerText = `${emoji} ${data.chatname || "匿名"}`;
-
-      const textDiv = document.createElement('div');
-      textDiv.classList.add('text');
-      textDiv.innerHTML = data.chatmessage || '';
-
-      messageDiv.appendChild(usernameBox);
-      messageDiv.appendChild(textDiv);
-
-      // 🔍 判斷訊息類型
-      const isBot = ["system", "bot"].includes(platformClass);
-      const isSpecialEvent = ["追隨", "訂閱", "加入會員", "follow", "subscribe", "member"]
-        .some(keyword => (data.chatmessage || "").toLowerCase().includes(keyword));
-
-      if (isBot) {
-        messageDiv.classList.add("bot");
-      } else if (isSpecialEvent) {
-        messageDiv.classList.add("fireblue", "boldpulse");
-      } else {
-        messageDiv.classList.add("fireblue");
-      }
-
-      // 🎨 隨機邊框色（只限 message）
-      const borderColors = [
-        "#00ffff", "#08f8f8", "#0ff0f0", "#17e9e9", "#1ee1e1", "#26dada",
-        "#2dd2d2", "#35cbcb", "#3cc3c3", "#44bcbc", "#4bb4b4", "#53adad"
-      ];
-      const randomColor = borderColors[Math.floor(Math.random() * borderColors.length)];
-      messageDiv.style.border = `1px solid ${randomColor}`;
-
-      messageContainer.appendChild(messageDiv);
-      chatContainer.appendChild(messageContainer);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+    const usernameBox = document.createElement('div');
+    usernameBox.classList.add('username-box');
+    const platformClass = data.type?.toLowerCase() || '';
+    if (["youtube", "twitch", "kick", "system"].includes(platformClass)) {
+      usernameBox.classList.add(platformClass);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      addMessageToOverlay({
-        chatname: "系統",
-        chatmessage: "聊天室已加載",
-        type: "system"
-      });
+    const platformEmoji = {
+      youtube: "❤️",
+      kick: "💚",
+      twitch: "💜"
+    };
+    const emoji = platformEmoji[platformClass] || "";
+    usernameBox.innerText = `${emoji} ${data.chatname || "匿名"}`;
 
-      const iframe = document.createElement("iframe");
-      iframe.src = featuredMode
-        ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
-        : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
-      iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
-      document.body.appendChild(iframe);
+    const textDiv = document.createElement('div');
+    textDiv.classList.add('text');
+    textDiv.innerHTML = data.chatmessage || '';
 
-      window.addEventListener("message", (event) => {
-        if (event.source !== iframe.contentWindow) return;
-        if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
-          addMessageToOverlay(event.data.dataReceived.overlayNinja);
-        }
-      });
+    messageDiv.appendChild(usernameBox);
+    messageDiv.appendChild(textDiv);
+
+    const isBot = ["system", "bot"].includes(platformClass);
+    const isSpecialEvent = ["追隨", "訂閱", "加入會員", "follow", "subscribe", "member"]
+      .some(keyword => (data.chatmessage || "").toLowerCase().includes(keyword));
+
+    if (isBot) {
+      messageDiv.classList.add("bot");
+    } else if (isSpecialEvent) {
+      messageDiv.classList.add("fireblue", "boldpulse");
+    } else {
+      messageDiv.classList.add("fireblue");
+    }
+
+    const borderColors = [
+      "#00ffff", "#08f8f8", "#0ff0f0", "#17e9e9", "#1ee1e1", "#26dada",
+      "#2dd2d2", "#35cbcb", "#3cc3c3", "#44bcbc", "#4bb4b4", "#53adad"
+    ];
+    const randomColor = borderColors[Math.floor(Math.random() * borderColors.length)];
+    messageDiv.style.border = `1px solid ${randomColor}`;
+
+    messageContainer.appendChild(messageDiv);
+    chatContainer.appendChild(messageContainer);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    setTimeout(() => {
+      messageContainer.classList.add('fadeout');
+    }, 15000);
+
+    setTimeout(() => {
+      if (messageContainer.parentNode) {
+        messageContainer.parentNode.removeChild(messageContainer);
+      }
+    }, 60000);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // 初始系統訊息
+    addMessageToOverlay({
+      chatname: "系統",
+      chatmessage: "聊天室已加載",
+      type: "system"
     });
-  </script>
+
+    // 🔗 iframe 聊天訊息來源
+    const iframe = document.createElement("iframe");
+    iframe.src = featuredMode
+      ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+      : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+    iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
+    document.body.appendChild(iframe);
+
+    window.addEventListener("message", (event) => {
+      if (event.source !== iframe.contentWindow) return;
+      if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
+        addMessageToOverlay(event.data.dataReceived.overlayNinja);
+      }
+    });
+
+    // 📢 廣播公告接收
+    const announcementChannel = new BroadcastChannel("announcements");
+    announcementChannel.addEventListener("message", (event) => {
+      const text = event.data?.text;
+      if (text) {
+        addMessageToOverlay({
+          chatname: "公告",
+          chatmessage: text,
+          type: "system"
+        });
+      }
+    });
+  });
+</script>
 </body>
 </html>
