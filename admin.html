@@ -11,12 +11,7 @@
       color: #fff;
       padding: 20px;
     }
-
-    h2 {
-      color: #53fc18;
-      margin-top: 30px;
-    }
-
+    h2 { color: #53fc18; margin-top: 30px; }
     input, button {
       margin: 5px 0;
       padding: 8px;
@@ -24,38 +19,21 @@
       border-radius: 5px;
       border: none;
     }
-
-    input {
-      width: 100%;
-      box-sizing: border-box;
-    }
-
+    input { width: 100%; box-sizing: border-box; }
     button {
-      background: #333;
-      color: #fff;
-      cursor: pointer;
+      background: #333; color: #fff; cursor: pointer;
     }
-
     button:hover {
-      background: #53fc18;
-      color: #000;
+      background: #53fc18; color: #000;
     }
-
     .item {
       background: #222;
       padding: 10px;
       margin: 10px 0;
       border-left: 4px solid #53fc18;
     }
-
-    .item span {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .section {
-      margin-bottom: 40px;
-    }
+    .item span { display: block; margin-bottom: 5px; }
+    .section { margin-bottom: 40px; }
   </style>
 </head>
 <body>
@@ -89,7 +67,26 @@
 
   <script>
     const channel = new BroadcastChannel("announcements");
-    const tips = [];
+    let tips = [];
+
+    // 儲存所有資料到 localStorage
+    function saveState() {
+      localStorage.setItem("announcementText", document.getElementById("announcementText").value);
+      localStorage.setItem("joinAnnouncementText", document.getElementById("joinAnnouncementText").value);
+      localStorage.setItem("tips", JSON.stringify(tips));
+    }
+
+    // 載入 localStorage 中的資料
+    function loadState() {
+      document.getElementById("announcementText").value = localStorage.getItem("announcementText") || "";
+      document.getElementById("joinAnnouncementText").value = localStorage.getItem("joinAnnouncementText") || "";
+      const savedTips = localStorage.getItem("tips");
+      if (savedTips) {
+        tips = JSON.parse(savedTips);
+        tips.forEach(tip => startTipLoop(tip.text, tip.interval));
+        renderTips();
+      }
+    }
 
     function renderTips() {
       const list = document.getElementById("tipList");
@@ -115,7 +112,8 @@
       const text = document.getElementById("announcementText").value.trim();
       if (!text) return;
       channel.postMessage({ text, type: "announcement" });
-      document.getElementById("announcementText").value = "";
+      console.log("📢 發送公告：", text);
+      saveState();
     });
 
     document.getElementById("addTip").addEventListener("click", () => {
@@ -127,27 +125,33 @@
       startTipLoop(text, interval);
       document.getElementById("tipText").value = "";
       document.getElementById("tipInterval").value = "";
+      saveState();
     });
 
     window.removeTip = function(index) {
       tips.splice(index, 1);
       renderTips();
+      saveState();
     };
 
     document.getElementById("setJoinAnnouncement").addEventListener("click", () => {
       const text = document.getElementById("joinAnnouncementText").value.trim();
       if (!text) return;
       channel.postMessage({ type: "join-trigger", text });
-      console.log("✅ 已設定加入公告：", text);
-      document.getElementById("joinAnnouncementText").value = "";
+      console.log("👋 設定加入公告：", text);
+      saveState();
     });
 
     document.getElementById("sendTest").addEventListener("click", () => {
       const text = document.getElementById("testText").value.trim();
       if (!text) return;
       channel.postMessage({ text, type: "test" });
+      console.log("🧪 發送測試訊息：", text);
       document.getElementById("testText").value = "";
     });
+
+    // 初始化
+    loadState();
   </script>
 </body>
 </html>
