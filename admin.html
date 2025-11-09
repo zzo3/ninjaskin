@@ -12,14 +12,14 @@
       padding: 20px;
     }
     h2 { color: #53fc18; margin-top: 30px; }
-    input, button {
+    input, button, select {
       margin: 5px 0;
       padding: 8px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
     }
-    input { width: 100%; box-sizing: border-box; }
+    input, select { width: 100%; box-sizing: border-box; }
     button {
       background: #333; color: #fff; cursor: pointer;
     }
@@ -41,12 +41,14 @@
 
   <div class="section">
     <h2>📢 公告（一次性）</h2>
+    <select id="announcementHistory"></select>
     <input id="announcementText" placeholder="輸入公告內容" />
     <button id="sendAnnouncement">發送公告</button>
   </div>
 
   <div class="section">
     <h2>🔁 提示（定時循環）</h2>
+    <select id="tipHistory"></select>
     <input id="tipText" placeholder="輸入提示內容" />
     <input id="tipInterval" type="number" placeholder="每幾分鐘顯示一次" />
     <button id="addTip">新增提示</button>
@@ -55,6 +57,7 @@
 
   <div class="section">
     <h2>👋 加入時觸發公告</h2>
+    <select id="joinHistory"></select>
     <input id="joinAnnouncementText" placeholder="輸入加入時顯示的公告內容" />
     <button id="setJoinAnnouncement">設定加入公告</button>
   </div>
@@ -67,7 +70,7 @@
 
   <script>
     const channel = new BroadcastChannel("announcements");
-    const socket = new WebSocket("wss://ninjaskin-production.up.railway.app"); // ← 換成你的 WebSocket server
+    const socket = new WebSocket("wss://ninjaskin-production.up.railway.app");
     let tips = [];
 
     function sendToBoth(text, type) {
@@ -76,6 +79,39 @@
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(payload));
       }
+      saveToHistory(type, text);
+    }
+
+    function saveToHistory(type, text) {
+      const key = `${type}History`;
+      const history = JSON.parse(localStorage.getItem(key) || "[]");
+      if (!history.includes(text)) {
+        history.unshift(text);
+        localStorage.setItem(key, JSON.stringify(history.slice(0, 20)));
+      }
+      renderHistory();
+    }
+
+    function renderHistory() {
+      renderSelect("announcementHistory", "announcementText", "announcement");
+      renderSelect("joinHistory", "joinAnnouncementText", "join-trigger");
+      renderSelect("tipHistory", "tipText", "tip");
+    }
+
+    function renderSelect(selectId, inputId, type) {
+      const select = document.getElementById(selectId);
+      const input = document.getElementById(inputId);
+      const history = JSON.parse(localStorage.getItem(`${type}History`) || "[]");
+      select.innerHTML = `<option value="">選擇歷史內容</option>`;
+      history.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
+      select.onchange = () => {
+        input.value = select.value;
+      };
     }
 
     function saveState() {
@@ -93,6 +129,7 @@
         tips.forEach(tip => startTipLoop(tip.text, tip.interval));
         renderTips();
       }
+      renderHistory();
     }
 
     function renderTips() {
@@ -132,6 +169,7 @@
       startTipLoop(text, interval);
       document.getElementById("tipText").value = "";
       document.getElementById("tipInterval").value = "";
+      saveToHistory("tip", text);
       saveState();
     });
 
