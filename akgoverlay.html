@@ -42,7 +42,7 @@
       position: relative;
       margin-bottom: 40px;
       will-change: transform, opacity;
-      animation: slideUpFadeIn 0.6s ease-out;
+      animation: fadeInUp 0.6s ease-out;
     }
     .message-container.fadeout {
       animation: fadeOutUp 10s ease-out forwards;
@@ -55,7 +55,7 @@
       color: #fff !important;
     }
 
-    @keyframes slideUpFadeIn {
+    @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(40px); }
       to   { opacity: 1; transform: translateY(0); }
     }
@@ -65,25 +65,49 @@
       100% { opacity: 0; transform: translateY(-30px); }
     }
 
+    @keyframes flamePulseBlue {
+      0%   { box-shadow: 0 0 8px #00f, 0 0 16px #0ff, 0 0 24px #0ff; }
+      50%  { box-shadow: 0 0 12px #33f, 0 0 20px #3ff, 0 0 28px #3ff; }
+      100% { box-shadow: 0 0 8px #00f, 0 0 16px #0ff, 0 0 24px #0ff; }
+    }
+
+    @keyframes scaleUpPulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.08); }
+    }
+
     .message {
       position: relative;
       display: inline-block;
       max-width: 100%;
-      background: rgba(0,255,255,0.08);
       padding: 5px;
       border-radius: 10px;
       color: #fff;
       word-wrap: break-word;
-      border: 1px solid #00ffff;
-      box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
       font-size: 0.75em;
       text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
     }
 
-    .message.announcement {
-      border: 2px solid #1e3a8a;
-      box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+    .message.fireblue {
+      background: rgba(0, 100, 255, 0.08);
+      border: 1px solid #00f;
+      animation: flamePulseBlue 1.5s infinite ease-in-out;
+    }
+
+    .message.fireblue.boldpulse {
       font-weight: bold;
+      animation:
+        flamePulseBlue 1.5s infinite ease-in-out,
+        scaleUpPulse 1.5s infinite ease-in-out;
+    }
+
+    .message.bot {
+      background: rgba(200, 200, 200, 0.05);
+      border: 1px solid #888;
+      color: #ccc;
+      font-style: italic;
+      box-shadow: none;
+      animation: none;
     }
 
     .username-box {
@@ -128,17 +152,6 @@
       font-style: italic;
     }
 
-    .donation-highlight {
-      background: rgba(255, 215, 0, 0.1);
-      border: 2px solid gold;
-      color: gold;
-      font-weight: bold;
-      padding: 6px 12px;
-      margin-top: 8px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px gold;
-    }
-
     .text {
       line-height: 1.4;
       word-break: break-word;
@@ -158,6 +171,7 @@
       const v = parseInt(urlParams.get('showtime') || '30000');
       return isNaN(v) ? 30000 : v;
     })();
+
 
     function addMessageToOverlay(data) {
       if (!data.chatname && data.meta) return;
@@ -191,11 +205,17 @@
       messageDiv.appendChild(usernameBox);
       messageDiv.appendChild(textDiv);
 
-      if (data.donation || data.hasDonation) {
-        const donationDiv = document.createElement('div');
-        donationDiv.classList.add('donation-highlight');
-        donationDiv.innerText = data.donation || data.hasDonation;
-        messageDiv.appendChild(donationDiv);
+      // 🔍 判斷訊息類型
+      const isBot = ["system", "bot"].includes(platformClass);
+      const isSpecialEvent = ["追隨", "訂閱", "加入會員", "follow", "subscribe", "member"]
+        .some(keyword => (data.chatmessage || "").toLowerCase().includes(keyword));
+
+      if (isBot) {
+        messageDiv.classList.add("bot");
+      } else if (isSpecialEvent) {
+        messageDiv.classList.add("fireblue", "boldpulse");
+      } else {
+        messageDiv.classList.add("fireblue");
       }
 
       messageContainer.appendChild(messageDiv);
