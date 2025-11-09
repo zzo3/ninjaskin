@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>公告管理</title>
+  <title>公告與提示管理</title>
   <style>
     body {
       font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
@@ -14,6 +14,7 @@
 
     h2 {
       color: #53fc18;
+      margin-top: 30px;
     }
 
     input, button {
@@ -40,95 +41,98 @@
       color: #000;
     }
 
-    .announcement-item {
+    .item {
       background: #222;
       padding: 10px;
       margin: 10px 0;
       border-left: 4px solid #53fc18;
     }
 
-    .announcement-item span {
+    .item span {
       display: block;
       margin-bottom: 5px;
     }
 
-    #announcementList {
-      margin-top: 20px;
+    .section {
+      margin-bottom: 40px;
     }
   </style>
 </head>
 <body>
-  <h2>📢 公告管理介面</h2>
-  <input id="announcementText" placeholder="輸入公告內容" />
-  <input id="announcementInterval" type="number" placeholder="間隔分鐘數（目前未使用）" />
-  <button id="addAnnouncement">新增公告</button>
-  <button id="updateAnnouncement">更新公告</button>
-  <button id="sendTest">發送測試公告</button>
+  <h1>🎛️ 公告與提示管理</h1>
 
-  <div id="announcementList"></div>
+  <div class="section">
+    <h2>📢 公告（一次性）</h2>
+    <input id="announcementText" placeholder="輸入公告內容" />
+    <button id="sendAnnouncement">發送公告</button>
+  </div>
+
+  <div class="section">
+    <h2>🔁 提示（定時循環）</h2>
+    <input id="tipText" placeholder="輸入提示內容" />
+    <input id="tipInterval" type="number" placeholder="每幾分鐘顯示一次" />
+    <button id="addTip">新增提示</button>
+    <div id="tipList"></div>
+  </div>
+
+  <div class="section">
+    <h2>🧪 測試訊息</h2>
+    <input id="testText" placeholder="輸入測試訊息" />
+    <button id="sendTest">發送測試</button>
+  </div>
 
   <script>
     const channel = new BroadcastChannel("announcements");
-    let announcements = [];
-    let editingIndex = null;
+    const tips = [];
 
-    function renderAnnouncements() {
-      const list = document.getElementById("announcementList");
+    function renderTips() {
+      const list = document.getElementById("tipList");
       list.innerHTML = "";
-      announcements.forEach((a, index) => {
+      tips.forEach((tip, index) => {
         const div = document.createElement("div");
-        div.className = "announcement-item";
+        div.className = "item";
         div.innerHTML = `
-          <span>${a.text}（每 ${a.interval} 分鐘）</span>
-          <button onclick="editAnnouncement(${index})">修改</button>
-          <button onclick="deleteAnnouncement(${index})">刪除</button>
+          <span>${tip.text}（每 ${tip.interval} 分鐘）</span>
+          <button onclick="removeTip(${index})">刪除</button>
         `;
         list.appendChild(div);
       });
     }
 
-    document.getElementById("addAnnouncement").addEventListener("click", () => {
+    function startTipLoop(text, interval) {
+      setInterval(() => {
+        channel.postMessage({ text, type: "tip" });
+      }, interval * 60 * 1000);
+    }
+
+    document.getElementById("sendAnnouncement").addEventListener("click", () => {
       const text = document.getElementById("announcementText").value.trim();
-      const interval = parseInt(document.getElementById("announcementInterval").value, 10) || 0;
       if (!text) return;
-      announcements.push({ text, interval });
-      renderAnnouncements();
-      channel.postMessage({ text });
+      channel.postMessage({ text, type: "announcement" });
       document.getElementById("announcementText").value = "";
-      document.getElementById("announcementInterval").value = "";
     });
 
-    window.editAnnouncement = function(index) {
-      editingIndex = index;
-      const a = announcements[index];
-      document.getElementById("announcementText").value = a.text;
-      document.getElementById("announcementInterval").value = a.interval;
-    }
-
-    document.getElementById("updateAnnouncement").addEventListener("click", () => {
-      if (editingIndex !== null) {
-        const text = document.getElementById("announcementText").value.trim();
-        const interval = parseInt(document.getElementById("announcementInterval").value, 10) || 0;
-        if (!text) return;
-        announcements[editingIndex].text = text;
-        announcements[editingIndex].interval = interval;
-        renderAnnouncements();
-        channel.postMessage({ text });
-        editingIndex = null;
-        document.getElementById("announcementText").value = "";
-        document.getElementById("announcementInterval").value = "";
-      }
+    document.getElementById("addTip").addEventListener("click", () => {
+      const text = document.getElementById("tipText").value.trim();
+      const interval = parseInt(document.getElementById("tipInterval").value, 10);
+      if (!text || isNaN(interval) || interval <= 0) return;
+      tips.push({ text, interval });
+      renderTips();
+      startTipLoop(text, interval);
+      document.getElementById("tipText").value = "";
+      document.getElementById("tipInterval").value = "";
     });
 
-    window.deleteAnnouncement = function(index) {
-      announcements.splice(index, 1);
-      renderAnnouncements();
-    }
+    window.removeTip = function(index) {
+      tips.splice(index, 1);
+      renderTips();
+    };
 
     document.getElementById("sendTest").addEventListener("click", () => {
-      const testText = "這是一則測試公告！（單位：分鐘）";
-      console.log("📤 發送測試公告：", testText);
-      channel.postMessage({ text: testText });
+      const text = document.getElementById("testText").value.trim();
+      if (!text) return;
+      channel.postMessage({ text, type: "test" });
+      document.getElementById("testText").value = "";
     });
   </script>
 </body>
