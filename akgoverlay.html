@@ -66,9 +66,9 @@
     }
 
     @keyframes flamePulseBlue {
-      0%   { box-shadow: 0 0 8px #00f, 0 0 16px #0ff, 0 0 24px #0ff; }
-      50%  { box-shadow: 0 0 12px #33f, 0 0 20px #3ff, 0 0 28px #3ff; }
-      100% { box-shadow: 0 0 8px #00f, 0 0 16px #0ff, 0 0 24px #0ff; }
+      0%   { box-shadow: 0 0 4px #00f, 0 0 8px #0ff, 0 0 12px #0ff; }
+      50%  { box-shadow: 0 0 6px #33f, 0 0 10px #3ff, 0 0 14px #3ff; }
+      100% { box-shadow: 0 0 4px #00f, 0 0 8px #0ff, 0 0 12px #0ff; }
     }
 
     @keyframes scaleUpPulse {
@@ -90,7 +90,6 @@
 
     .message.fireblue {
       background: rgba(0, 100, 255, 0.08);
-      border: 1px solid #00f;
       animation: flamePulseBlue 1.5s infinite ease-in-out;
     }
 
@@ -172,7 +171,6 @@
       return isNaN(v) ? 30000 : v;
     })();
 
-
     function addMessageToOverlay(data) {
       if (!data.chatname && data.meta) return;
 
@@ -217,6 +215,14 @@
       } else {
         messageDiv.classList.add("fireblue");
       }
+
+      // 🎨 隨機邊框色（只限 message）
+      const borderColors = [
+        "#00ffff", "#08f8f8", "#0ff0f0", "#17e9e9", "#1ee1e1", "#26dada",
+        "#2dd2d2", "#35cbcb", "#3cc3c3", "#44bcbc", "#4bb4b4", "#53adad"
+      ];
+      const randomColor = borderColors[Math.floor(Math.random() * borderColors.length)];
+      messageDiv.style.border = `1px solid ${randomColor}`;
 
       messageContainer.appendChild(messageDiv);
       chatContainer.appendChild(messageContainer);
