@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>公告管理</title>
+  <style>
+    body {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #53fc18;
+    }
+
+    input, button {
+      margin: 5px 0;
+      padding: 8px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #53fc18;
+      color: #000;
+    }
+
+    .announcement-item {
+      background: #222;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 4px solid #53fc18;
+    }
+
+    .announcement-item span {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    #announcementList {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>📢 公告管理介面</h2>
+  <input id="announcementText" placeholder="輸入公告內容" />
+  <input id="announcementInterval" type="number" placeholder="間隔分鐘數（目前未使用）" />
+  <button id="addAnnouncement">新增公告</button>
+  <button id="updateAnnouncement">更新公告</button>
+  <button id="sendTest">發送測試公告</button>
+
+  <div id="announcementList"></div>
+
+  <script>
+    let announcements = [];
+    let editingIndex = null;
+    const channel = new BroadcastChannel("announcements");
+
+    function renderAnnouncements() {
+      const list = document.getElementById("announcementList");
+      list.innerHTML = "";
+      announcements.forEach((a, index) => {
+        const div = document.createElement("div");
+        div.className = "announcement-item";
+        div.innerHTML = `
+          <span>${a.text}（每 ${a.interval} 分鐘）</span>
+          <button onclick="editAnnouncement(${index})">修改</button>
+          <button onclick="deleteAnnouncement(${index})">刪除</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    document.getElementById("addAnnouncement").addEventListener("click", () => {
+      const text = document.getElementById("announcementText").value.trim();
+      const interval = parseInt(document.getElementById("announcementInterval").value, 10) || 0;
+      if (!text) return;
+      announcements.push({ text, interval });
+      renderAnnouncements();
+      channel.postMessage({ text });
+    });
+
+    window.editAnnouncement = function(index) {
+      editingIndex = index;
+      const a = announcements[index];
+      document.getElementById("announcementText").value = a.text;
+      document.getElementById("announcementInterval").value = a.interval;
+    }
+
+    document.getElementById("updateAnnouncement").addEventListener("click", () => {
+      if (editingIndex !== null) {
+        const text = document.getElementById("announcementText").value.trim();
+        const interval = parseInt(document.getElementById("announcementInterval").value, 10) || 0;
+        if (!text) return;
+        announcements[editingIndex].text = text;
+        announcements[editingIndex].interval = interval;
+        renderAnnouncements();
+        channel.postMessage({ text });
+        editingIndex = null;
+      }
+    });
+
+    window.deleteAnnouncement = function(index) {
+      announcements.splice(index, 1);
+      renderAnnouncements();
+    }
+
+    document.getElementById("sendTest").addEventListener("click", () => {
+      channel.postMessage({ text: "這是一則測試公告！（單位：分鐘）" });
+    });
+  </script>
+</body>
+</html>
 
