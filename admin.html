@@ -68,9 +68,9 @@
   <div id="announcementList"></div>
 
   <script>
+    const channel = new BroadcastChannel("announcements");
     let announcements = [];
     let editingIndex = null;
-    const channel = new BroadcastChannel("announcements");
 
     function renderAnnouncements() {
       const list = document.getElementById("announcementList");
@@ -94,6 +94,8 @@
       announcements.push({ text, interval });
       renderAnnouncements();
       channel.postMessage({ text });
+      document.getElementById("announcementText").value = "";
+      document.getElementById("announcementInterval").value = "";
     });
 
     window.editAnnouncement = function(index) {
@@ -113,6 +115,8 @@
         renderAnnouncements();
         channel.postMessage({ text });
         editingIndex = null;
+        document.getElementById("announcementText").value = "";
+        document.getElementById("announcementInterval").value = "";
       }
     });
 
@@ -122,9 +126,10 @@
     }
 
     document.getElementById("sendTest").addEventListener("click", () => {
-      channel.postMessage({ text: "這是一則測試公告！（單位：分鐘）" });
+      const testText = "這是一則測試公告！（單位：分鐘）";
+      console.log("📤 發送測試公告：", testText);
+      channel.postMessage({ text: testText });
     });
   </script>
 </body>
 </html>
-
