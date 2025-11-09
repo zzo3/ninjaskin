@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Overlay</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+      background: transparent;
+      color: #fff;
+    }
+
+    #chat-container {
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: flex-start;
+      padding: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+      max-height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    #chat-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .message-container {
+      position: relative;
+      margin-bottom: 40px;
+      will-change: transform, opacity;
+      animation: slideUpFade 0.6s ease-out;
+    }
+    .message-container.fadeout {
+      animation: fadeOutOnly 10s ease-out forwards;
+      animation-delay: 30s;
+    }
+    .message-container.fadeout:hover {
+      animation-play-state: paused;
+      opacity: 1 !important;
+      transform: scale(1.03);
+      color: #fff !important;
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOutOnly {
+      from { opacity: 1; color: #fff; }
+      to   { opacity: 0; color: #aaa; }
+    }
+
+    .message {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      background: rgba(0,255,255,0.08);
+      padding: 5px;
+      border-radius: 10px;
+      color: #fff;
+      word-wrap: break-word;
+      border: 1px solid #00ffff;
+      box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+      font-size: 0.75em;
+      text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
+    }
+
+    .message.announcement {
+      border: 2px solid #1e3a8a;
+      box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+      font-weight: bold;
+    }
+
+    .username-box {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 3px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      z-index: 2;
+      background: transparent;
+      font-size: 0.85em;
+      text-shadow: 1px 1px 2px #000;
+      opacity: 0.9;
+      border: 1px solid #fff;
+    }
+
+    .username-box.youtube {
+      color: #FF0000;
+      border: 2px solid #FF0000;
+      box-shadow: 0 0 6px #FF0000;
+    }
+    .username-box.twitch {
+      color: #9146FF;
+      border: 2px solid #9146FF;
+      box-shadow: 0 0 6px #9146FF;
+    }
+    .username-box.kick {
+      color: #53fc18;
+      border: 2px solid #53fc18;
+      box-shadow: 0 0 6px #53fc18;
+    }
+    .username-box.system {
+      color: #ccc;
+      border: 1px solid #888;
+      box-shadow: none;
+      font-style: italic;
+    }
+
+    .donation-highlight {
+      background: rgba(255, 215, 0, 0.1);
+      border: 2px solid gold;
+      color: gold;
+      font-weight: bold;
+      padding: 6px 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px gold;
+    }
+
+    .text {
+      line-height: 1.4;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomID = urlParams.get("session") || "4DP7Stjuew";
+    const password = "false";
+    const featuredMode = false;
+    const chatContainer = document.getElementById('chat-container');
+
+    const SHOWTIME = (() => {
+      const v = parseInt(urlParams.get('showtime') || '30000');
+      return isNaN(v) ? 30000 : v;
+    })();
+
+    function addMessageToOverlay(data) {
+      if (!data.chatname && data.meta) return;
+
+      const messageContainer = document.createElement('div');
+      messageContainer.classList.add('message-container', 'fadeout');
+
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      if (data.mid) messageDiv.id = data.mid;
+
+      const usernameBox = document.createElement('div');
+      usernameBox.classList.add('username-box');
+      const platformClass = data.type?.toLowerCase() || '';
+      if (["youtube", "twitch", "kick", "system"].includes(platformClass)) {
+        usernameBox.classList.add(platformClass);
+      }
+
+      usernameBox.innerText = data.chatname || "匿名";
+
+      const textDiv = document.createElement('div');
+      textDiv.classList.add('text');
+      textDiv.innerHTML = data.chatmessage || '';
+
+      messageDiv.appendChild(usernameBox);
+      messageDiv.appendChild(textDiv);
+
+      if (data.donation || data.hasDonation) {
+        const donationDiv = document.createElement('div');
+        donationDiv.classList.add('donation-highlight');
+        donationDiv.innerText = data.donation || data.hasDonation;
+        messageDiv.appendChild(donationDiv);
+      }
+
+      messageContainer.appendChild(messageDiv);
+      chatContainer.appendChild(messageContainer);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      addMessageToOverlay({
+        chatname: "系統",
+        chatmessage: "聊天室已加載",
+        type: "system"
+      });
+
+      const iframe = document.createElement("iframe");
+      iframe.src = featuredMode
+        ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+        : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+      iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
+      document.body.appendChild(iframe);
+
+      window.addEventListener("message", (event) => {
+        if (event.source !== iframe.contentWindow) return;
+        if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
+          addMessageToOverlay(event.data.dataReceived.overlayNinja);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
