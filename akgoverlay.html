@@ -19,8 +19,8 @@
 
     #chat-container {
       display: flex;
-      flex-direction: column-reverse;
-      justify-content: flex-start;
+      flex-direction: column;
+      justify-content: flex-end;
       padding: 15px;
       max-width: 400px;
       margin: 0 auto;
@@ -154,6 +154,7 @@
       return isNaN(v) ? 30000 : v;
     })();
 
+
     function addMessageToOverlay(data) {
       if (!data.chatname && data.meta) return;
 
@@ -194,7 +195,8 @@
       }
 
       messageContainer.appendChild(messageDiv);
-      chatContainer.insertBefore(messageContainer, chatContainer.firstChild);
+      chatContainer.appendChild(messageContainer);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
