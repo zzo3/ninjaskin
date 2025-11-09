@@ -67,16 +67,23 @@
 
   <script>
     const channel = new BroadcastChannel("announcements");
+    const socket = new WebSocket("wss://ninjaskin-production.up.railway.app"); // ← 換成你的 WebSocket server
     let tips = [];
 
-    // 儲存所有資料到 localStorage
+    function sendToBoth(text, type) {
+      const payload = { text, type };
+      channel.postMessage(payload);
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));
+      }
+    }
+
     function saveState() {
       localStorage.setItem("announcementText", document.getElementById("announcementText").value);
       localStorage.setItem("joinAnnouncementText", document.getElementById("joinAnnouncementText").value);
       localStorage.setItem("tips", JSON.stringify(tips));
     }
 
-    // 載入 localStorage 中的資料
     function loadState() {
       document.getElementById("announcementText").value = localStorage.getItem("announcementText") || "";
       document.getElementById("joinAnnouncementText").value = localStorage.getItem("joinAnnouncementText") || "";
@@ -104,14 +111,14 @@
 
     function startTipLoop(text, interval) {
       setInterval(() => {
-        channel.postMessage({ text, type: "tip" });
+        sendToBoth(text, "tip");
       }, interval * 60 * 1000);
     }
 
     document.getElementById("sendAnnouncement").addEventListener("click", () => {
       const text = document.getElementById("announcementText").value.trim();
       if (!text) return;
-      channel.postMessage({ text, type: "announcement" });
+      sendToBoth(text, "announcement");
       console.log("📢 發送公告：", text);
       saveState();
     });
@@ -137,7 +144,7 @@
     document.getElementById("setJoinAnnouncement").addEventListener("click", () => {
       const text = document.getElementById("joinAnnouncementText").value.trim();
       if (!text) return;
-      channel.postMessage({ type: "join-trigger", text });
+      sendToBoth(text, "join-trigger");
       console.log("👋 設定加入公告：", text);
       saveState();
     });
@@ -145,12 +152,11 @@
     document.getElementById("sendTest").addEventListener("click", () => {
       const text = document.getElementById("testText").value.trim();
       if (!text) return;
-      channel.postMessage({ text, type: "test" });
+      sendToBoth(text, "test");
       console.log("🧪 發送測試訊息：", text);
       document.getElementById("testText").value = "";
     });
 
-    // 初始化
     loadState();
   </script>
 </body>
