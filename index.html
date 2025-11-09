@@ -95,17 +95,7 @@
       opacity: 0.9;
     }
 
-    .username-box.twitch { border: 2px solid rgba(145,70,255,0.9); color: rgba(145,70,255,0.9); box-shadow: 0 0 6px rgba(145,70,255,0.9); }
-    .username-box.youtube { border: 2px solid rgba(255,0,0,0.9); color: rgba(255,0,0,0.9); box-shadow: 0 0 6px rgba(255,0,0,0.9); }
-    .username-box.kick { border: 2px solid rgba(0,255,128,0.9); color: rgba(0,255,128,0.9); box-shadow: 0 0 6px rgba(0,255,128,0.9); }
-
-    .username-box.bot { box-shadow: none; }
-    .username-box.highlight { border-width: 2px; box-shadow: 0 0 10px currentColor, 0 0 20px currentColor; }
-
     .text { line-height: 1.4; word-break: break-word; }
-    .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
-    .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
-    .badges { margin-left: 6px; }
 
     /* 管理介面樣式 */
     #admin-container {
@@ -155,108 +145,48 @@
   </div>
   <div id="clock"></div>
 
-
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode') || 'A';
-    const session = urlParams.get('session') || 'default';
 
     const chatContainer = document.getElementById('chat-container');
     const adminContainer = document.getElementById('admin-container');
     const clockDiv = document.getElementById('clock');
 
-    const socket = new WebSocket("ws://localhost:8080");
-
-    /* ========== A 頁面：OBS 聊天浮層 ========== */
+    /* ========== A 頁面：OBS 聊天浮層（只顯示公告） ========== */
     if (mode === 'A') {
       chatContainer.style.display = "flex";
       adminContainer.style.display = "none";
       clockDiv.style.display = "none";
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.session && data.session !== session) return; // 過濾不同房間
-        addMessageToOverlay(data);
+      function addAnnouncement(text) {
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'announcement');
+        messageDiv.innerHTML = `
+          <div class="username-box announcement">📢 公告</div>
+          <div class="text">${text}</div>
+        `;
+        messageContainer.appendChild(messageDiv);
+        chatContainer.appendChild(messageContainer);
+      }
+
+      // 監聽公告更新
+      const channel = new BroadcastChannel("announcements");
+      channel.onmessage = (e) => {
+        addAnnouncement(e.data.text);
       };
 
-      function addEventToOverlay(data) {
-        const messageContainer = document.createElement('div');
-        messageContainer.classList.add('message-container');
-
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-
-        const usernameBox = document.createElement('div');
-        usernameBox.classList.add('username-box', 'highlight');
-        usernameBox.textContent = data.chatname;
-
-        let eventText = '';
-        if (data.type === 'follow') eventText = `🎉 ${data.chatname} just followed! 🎉`;
-        else if (data.type === 'subscription') eventText = `🎉 ${data.chatname} subscribed! 🎉`;
-        else if (data.type === 'donation') eventText = `💰 ${data.chatname} donated ${data.amount || ''}! 💰`;
-        else if (data.type === 'gift') eventText = `🎁 ${data.chatname} sent a gift! 🎁`;
-        else if (data.type === 'bits') eventText = `✨ ${data.chatname} cheered with bits! ✨`;
-
-        const textDiv = document.createElement('div');
-        textDiv.classList.add('text');
-        textDiv.innerHTML = eventText;
-
-        messageDiv.appendChild(usernameBox);
-        messageDiv.appendChild(textDiv);
-        messageContainer.appendChild(messageDiv);
-        chatContainer.appendChild(messageContainer);
-      }
-
-      function addMessageToOverlay(data) {
-        if (!data || !data.chatname || !data.chatmessage) return;
-
-        if (['follow','subscription','donation','gift','bits'].includes(data.type)) {
-          addEventToOverlay(data);
-          return;
-        }
-
-        const messageContainer = document.createElement('div');
-        messageContainer.classList.add('message-container');
-
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-        if (data.type === 'announcement') messageDiv.classList.add('announcement');
-
-        let chatbadges = "";
-        if (data.chatbadges) {
-          data.chatbadges.slice(0, 1).forEach(badge => {
-            if (badge.type === "img" && badge.src) {
-              chatbadges += `<img class='badge' src='${badge.src}' />`;
-            } else if (badge.type === "svg" && badge.html) {
-              chatbadges += `<span class='badge svg'>${badge.html}</span>`;
-            }
-          });
-        }
-
-        messageDiv.innerHTML = `
-          <div class="username-box ${data.type === 'announcement' ? 'announcement' : (data.platform || '')}">
-            <span>${data.chatname}</span>
-            <span class="badges">${chatbadges}</span>
-          </div>
-          <div class="text">${data.chatmessage}</div>
-        `;
-
-        messageContainer.appendChild(messageDiv);
-        chatContainer.appendChild(messageContainer);
-      }
-
+      // 測試訊息
       window.onload = () => {
-        addMessageToOverlay({
-          chatname: "📢 系統測試",
-          chatmessage: "🗨️聊天室已成功啟動！（A頁面）",
-          type: "announcement",
-          session
-        });
+        addAnnouncement("🗨️聊天室已成功啟動！（A頁面）");
       };
     }
 
 
-    /* ========== B 頁面：螢幕用（含時鐘） ========== */
+    /* ========== B 頁面：螢幕用（含時鐘，顯示公告） ========== */
     if (mode === 'B') {
       chatContainer.style.display = "flex";
       adminContainer.style.display = "none";
@@ -272,40 +202,29 @@
       setInterval(updateClock, 1000);
       updateClock();
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.session && data.session !== session) return;
-        addMessageToOverlay(data);
-      };
-
-      function addMessageToOverlay(data) {
-        if (!data || !data.chatname || !data.chatmessage) return;
-
+      function addAnnouncement(text) {
         const messageContainer = document.createElement('div');
         messageContainer.classList.add('message-container');
 
         const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-        if (data.type === 'announcement') messageDiv.classList.add('announcement');
-
+        messageDiv.classList.add('message', 'announcement');
         messageDiv.innerHTML = `
-          <div class="username-box ${data.type === 'announcement' ? 'announcement' : (data.platform || '')}">
-            <span>${data.chatname}</span>
-          </div>
-          <div class="text">${data.chatmessage}</div>
+          <div class="username-box announcement">📢 公告</div>
+          <div class="text">${text}</div>
         `;
-
         messageContainer.appendChild(messageDiv);
         chatContainer.appendChild(messageContainer);
       }
 
+      // 監聽公告更新
+      const channel = new BroadcastChannel("announcements");
+      channel.onmessage = (e) => {
+        addAnnouncement(e.data.text);
+      };
+
+      // 測試訊息
       window.onload = () => {
-        addMessageToOverlay({
-          chatname: "📢 系統測試",
-          chatmessage: "🗨️聊天室已成功啟動！（B頁面，含時鐘）",
-          type: "announcement",
-          session
-        });
+        addAnnouncement("🗨️聊天室已成功啟動！（B頁面，含時鐘）");
       };
     }
 
@@ -318,6 +237,7 @@
 
       let announcements = [];
       let editingIndex = null;
+      const channel = new BroadcastChannel("announcements");
 
       function renderAnnouncements() {
         const list = document.getElementById("announcementList");
@@ -336,10 +256,10 @@
 
       document.getElementById("addAnnouncement").addEventListener("click", () => {
         const text = document.getElementById("announcementText").value;
-        const interval = parseInt(document.getElementById("announcementInterval").value, 10); // 單位：分鐘
+        const interval = parseInt(document.getElementById("announcementInterval").value, 10);
         announcements.push({ text, interval });
         renderAnnouncements();
-        socket.send(JSON.stringify({ chatname: "📢 公告", chatmessage: text, type: "announcement", session }));
+        channel.postMessage({ text }); // ✅ 廣播給 A、B 頁
       });
 
       window.editAnnouncement = function(index) {
@@ -352,9 +272,9 @@
       document.getElementById("updateAnnouncement").addEventListener("click", () => {
         if (editingIndex !== null) {
           announcements[editingIndex].text = document.getElementById("announcementText").value;
-          announcements[editingIndex].interval = parseInt(document.getElementById("announcementInterval").value, 10); // 單位：分鐘
+          announcements[editingIndex].interval = parseInt(document.getElementById("announcementInterval").value, 10);
           renderAnnouncements();
-          socket.send(JSON.stringify({ chatname: "📢 公告更新", chatmessage: announcements[editingIndex].text, type: "announcement", session }));
+          channel.postMessage({ text: announcements[editingIndex].text }); // ✅ 廣播更新
           editingIndex = null;
         }
       });
@@ -365,13 +285,7 @@
       }
 
       document.getElementById("sendTest").addEventListener("click", () => {
-        const testMsg = {
-          chatname: "📢 測試公告",
-          chatmessage: "這是一則測試訊息！（單位：分鐘）",
-          type: "announcement",
-          session
-        };
-        socket.send(JSON.stringify(testMsg));
+        channel.postMessage({ text: "這是一則測試公告！（單位：分鐘）" });
       });
     }
   </script>
