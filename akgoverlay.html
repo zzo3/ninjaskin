@@ -28,10 +28,14 @@
       overflow-y: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      pointer-events: none;
     }
     #chat-container::-webkit-scrollbar {
       width: 0px;
       background: transparent;
+    }
+    .message-container * {
+      pointer-events: auto;
     }
 
     .message-container {
@@ -153,7 +157,6 @@
       const v = parseInt(urlParams.get('showtime') || '30000');
       return isNaN(v) ? 30000 : v;
     })();
-
 
     function addMessageToOverlay(data) {
       if (!data.chatname && data.meta) return;
