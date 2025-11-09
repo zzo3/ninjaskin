@@ -355,16 +355,20 @@
     });
 
     // 📢 廣播公告接收
-    const announcementChannel = new BroadcastChannel("announcements");
-    announcementChannel.addEventListener("message", (event) => {
-      const text = event.data?.text;
-      if (text) {
-        addMessageToOverlay({
-          chatname: "公告",
-          chatmessage: text,
-          type: "system"
-        });
-      }
+const announcementChannel = new BroadcastChannel("announcements");
+announcementChannel.addEventListener("message", (event) => {
+  const { text, type } = event.data || {};
+  if (!text) return;
+
+  let label = "系統";
+  if (type === "announcement") label = "📢 公告";
+  else if (type === "tip") label = "💡 提示";
+  else if (type === "test") label = "🧪 測試";
+
+  addMessageToOverlay({
+    chatname: label,
+    chatmessage: text,
+    type: "system"
     });
   });
 </script>
