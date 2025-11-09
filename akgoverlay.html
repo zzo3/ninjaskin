@@ -42,26 +42,27 @@
       position: relative;
       margin-bottom: 40px;
       will-change: transform, opacity;
-      animation: slideUpFade 0.6s ease-out;
+      animation: slideUpFadeIn 0.6s ease-out;
     }
     .message-container.fadeout {
-      animation: fadeOutOnly 10s ease-out forwards;
+      animation: fadeOutUp 10s ease-out forwards;
       animation-delay: 30s;
     }
     .message-container.fadeout:hover {
       animation-play-state: paused;
       opacity: 1 !important;
-      transform: scale(1.03);
+      transform: translateY(0) scale(1.03);
       color: #fff !important;
     }
 
-    @keyframes slideUpFade {
+    @keyframes slideUpFadeIn {
       from { opacity: 0; transform: translateY(40px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes fadeOutOnly {
-      from { opacity: 1; color: #fff; }
-      to   { opacity: 0; color: #aaa; }
+
+    @keyframes fadeOutUp {
+      0%   { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-30px); }
     }
 
     .message {
