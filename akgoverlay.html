@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -46,13 +47,10 @@
     }
     .message-container.fadeout {
       animation: fadeOutUp 10s ease-out forwards;
-      animation-delay: 30s;
     }
     .message-container.fadeout:hover {
-      animation-play-state: paused;
-      opacity: 1 !important;
       transform: translateY(0) scale(1.03);
-      color: #fff !important;
+      opacity: 1;
     }
 
     @keyframes fadeInUp {
@@ -157,7 +155,108 @@
     }
   </style>
 </head>
+
 <body>
+  <div id="chat-container"></div>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomID = urlParams.get("session") || "4DP7Stjuew";
+    const password = "false";
+    const featuredMode = false;
+    const chatContainer = document.getElementById('chat-container');
+
+    function addMessageToOverlay(data) {
+      if (!data.chatname && data.meta) return;
+
+      const messageContainer = document.createElement('div');
+      messageContainer.classList.add('message-container');
+
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      if (data.mid) messageDiv.id = data.mid;
+
+      const usernameBox = document.createElement('div');
+      usernameBox.classList.add('username-box');
+      const platformClass = data.type?.toLowerCase() || '';
+      if (["youtube", "twitch", "kick", "system"].includes(platformClass)) {
+        usernameBox.classList.add(platformClass);
+      }
+
+      const platformEmoji = {
+        youtube: "❤️",
+        kick: "💚",
+        twitch: "💜"
+      };
+      const emoji = platformEmoji[platformClass] || "";
+      usernameBox.innerText = `${emoji} ${data.chatname || "匿名"}`;
+
+      const textDiv = document.createElement('div');
+      textDiv.classList.add('text');
+      textDiv.innerHTML = data.chatmessage || '';
+
+      messageDiv.appendChild(usernameBox);
+      messageDiv.appendChild(textDiv);
+
+      const isBot = ["system", "bot"].includes(platformClass);
+      const isSpecialEvent = ["追隨", "訂閱", "加入會員", "follow", "subscribe", "member"]
+        .some(keyword => (data.chatmessage || "").toLowerCase().includes(keyword));
+
+      if (isBot) {
+        messageDiv.classList.add("bot");
+      } else if (isSpecialEvent) {
+        messageDiv.classList.add("fireblue", "boldpulse");
+      } else {
+        messageDiv.classList.add("fireblue");
+      }
+
+      const borderColors = [
+        "#00ffff", "#08f8f8", "#0ff0f0", "#17e9e9", "#1ee1e1", "#26dada",
+        "#2dd2d2", "#35cbcb", "#3cc3c3", "#44bcbc", "#4bb4b4", "#53adad"
+      ];
+      const randomColor = borderColors[Math.floor(Math.random() * borderColors.length)];
+      messageDiv.style.border = `1px solid ${randomColor}`;
+
+      messageContainer.appendChild(messageDiv);
+      chatContainer.appendChild(messageContainer);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      // ⏱️ 15 秒後觸發淡出動畫
+      setTimeout(() => {
+        messageContainer.classList.add('fadeout');
+      }, 15000);
+
+      // 🧹 60 秒後從 DOM 中移除
+      setTimeout(() => {
+        if (messageContainer.parentNode) {
+          messageContainer.parentNode.removeChild(messageContainer);
+        }
+      }, 60000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      addMessageToOverlay({
+        chatname: "系統",
+        chatmessage: "聊天室已加載",
+        type: "system"
+      });
+
+      const iframe = document.createElement("iframe");
+      iframe.src = featuredMode
+        ? `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`
+        : `https://vdo.socialstream.ninja/?ln&salt=vdo.ninja&password=${password}&push&label=dock&vd=0&ad=0&novideo&noaudio&autostart&cleanoutput&room=${roomID}`;
+      iframe.style.cssText = "width: 0px; height: 0px; position: fixed; left: -100px; top: -100px;";
+      document.body.appendChild(iframe);
+
+      window.addEventListener("message", (event) => {
+        if (event.source !== iframe.contentWindow) return;
+        if (event.data.dataReceived && event.data.dataReceived.overlayNinja) {
+          addMessageToOverlay(event.data.dataReceived.overlayNinja);
+        }
+      });
+    });
+  </script>
+</body>
+
   <div id="chat-container"></div>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
