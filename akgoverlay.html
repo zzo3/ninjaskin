@@ -50,9 +50,10 @@
     }
 
     @keyframes slideUpFade {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
     @keyframes fadeOutOnly {
       from { opacity: 1; color: #fff; }
       to   { opacity: 0; color: #aaa; }
@@ -93,7 +94,11 @@
       text-shadow: 1px 1px 2px #000;
       opacity: 0.9;
       border: 1px solid #fff;
-    }
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+}
 
     .username-box.youtube {
       color: #FF0000;
@@ -143,6 +148,14 @@
     const password = "false";
     const featuredMode = false;
     const chatContainer = document.getElementById('chat-container');
+
+const platformEmoji = {
+  youtube: "❤️",
+  kick: "💚",
+  twitch: "💜"
+};
+const emoji = platformEmoji[platformClass] || "";
+usernameBox.innerText = `${emoji} ${data.chatname || "匿名"}`;
 
     const SHOWTIME = (() => {
       const v = parseInt(urlParams.get('showtime') || '30000');
