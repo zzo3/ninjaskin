@@ -1,235 +1,309 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室浮層 + 公告管理台</title>
+  <title>聊天室與公告管理</title>
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
-  background: #000;
-  color: #fff;
-}
-
-#chat-container {
-  position: relative;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 15px;
-  max-width: 400px;
-  margin: 0 auto;
-  max-height: 100vh;
-  overflow-y: auto;
-}
-
-/* 訊息容器 */
-.message-container {
-  position: relative;
-  margin-bottom: 40px;
-  will-change: transform, opacity;
-  animation: slideUpFade 0.6s ease-out;
-}
-.message-container.fadeout {
-  animation: fadeOutOnly 10s ease-out forwards;
-  animation-delay: 30s;
-}
-.message-container.fadeout:hover {
-  animation-play-state: paused;
-  opacity: 1 !important;
-  transform: scale(1.03);
-  color: #fff !important;
-}
-
-/* 動畫 */
-@keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeOutOnly {
-  from { opacity: 1; color: #fff; }
-  to   { opacity: 0; color: #aaa; }
-}
-
-/* 訊息框 */
-.message {
-  position: relative;
-  display: inline-block;
-  max-width: 100%;
-  background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,0,0,0.2));
-  padding: 8px;
-  border-radius: 10px;
-  color: #fff;
-  word-wrap: break-word;
-  border: 1px solid #00ffff;
-  box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
-  font-size: 0.75em;
-  text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
-}
-
-/* 名稱框 */
-.username-box {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  margin-bottom: 3px;
-  padding: 4px 8px;
-  border-radius: 10px;
-  font-weight: 600;
-  z-index: 2;
-  background: transparent;
-  font-size: 0.85em;
-  text-shadow: 1px 1px 2px #000;
-  opacity: 0.9;
-}
-.username-box.twitch { border: 2px solid rgba(145,70,255,0.9); color: rgba(145,70,255,0.9); box-shadow: 0 0 6px rgba(145,70,255,0.9); }
-.username-box.youtube { border: 2px solid rgba(255,0,0,0.9); color: rgba(255,0,0,0.9); box-shadow: 0 0 6px rgba(255,0,0,0.9); }
-.username-box.kick { border: 2px solid rgba(0,255,128,0.9); color: rgba(0,255,128,0.9); box-shadow: 0 0 6px rgba(0,255,128,0.9); }
-.username-box.facebook { border: 2px solid rgba(59,89,152,0.9); color: rgba(59,89,152,0.9); box-shadow: 0 0 6px rgba(59,89,152,0.9); }
-.username-box.bot { box-shadow: none; }
-
-/* 公告訊息樣式：深藍色邊框 + 光暈 */
-.message.announcement {
-  border: 2px solid #1e3a8a;
-  box-shadow: 0 0 10px #1e3a8a, 0 0 20px #1e3a8a;
-  font-weight: bold;
-}
-.username-box.announcement {
-  border: 2px solid #1e3a8a;
-  color: #1e3a8a;
-  box-shadow: 0 0 6px #1e3a8a;
-}
-
-/* 特別提示樣式：橘色邊框 + 光暈 */
-.message.special {
-  border: 2px solid orange;
-  box-shadow: 0 0 10px orange, 0 0 20px orange;
-  font-weight: bold;
-}
-.username-box.special {
-  border: 2px solid orange;
-  color: orange;
-  box-shadow: 0 0 6px orange;
-}
-
-/* 公告管理台 */
-#announcement-panel input, #announcement-panel button { margin-top:5px; }
-  </style>
-</head>
-
-
-<body>
-  <!-- 聊天訊息框 -->
-  <div id="chat-container"></div>
-
-  <!-- 公告管理台 -->
-  <div id="announcement-panel" style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:10px; border-radius:8px; width:360px; z-index:9999;">
-    <h3>公告管理台</h3>
-    <label>文字：</label>
-    <input id="msgText" type="text" style="width:100%;"><br>
-    <label>顏色 (Hex)：</label>
-    <input id="msgColor" type="text" value="#00ffff" style="width:100%;"><br>
-    <label>光暈：</label>
-    <input id="msgGlow" type="checkbox" checked><br>
-    <label>間隔 (分鐘)：</label>
-    <input id="msgInterval" type="number" value="5" style="width:100%;"><br><br>
-
-    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-      <button onclick="addAnnouncement()" style="flex:1; margin-right:5px; padding:6px;">新增</button>
-      <button onclick="updateAnnouncement()" style="flex:1; margin-right:5px; padding:6px;">修改</button>
-      <button onclick="deleteAnnouncement()" style="flex:1; padding:6px;">刪除</button>
-    </div>
-
-    <button onclick="toggleAutoPush()" style="width:100%; padding:6px; margin-bottom:10px;" id="autoPushBtn">暫停自動推送</button>
-
-    <h4>公告列表</h4>
-    <div id="announcementList" style="max-height:260px; overflow-y:auto; background:#333; padding:5px; border-radius:5px;"></div>
-  </div>
-
-<script>
-  /* ====== 聊天訊息邏輯 ====== */
-  const chatContainer = document.getElementById('chat-container');
-  let lastSender = null;
-  let lastMessageDiv = null;
-
-  function addEventToOverlay(data) {
-    const eventDiv = document.createElement('div');
-    eventDiv.classList.add('message', 'special'); // 特別提示樣式
-    let eventText = '';
-    if (data.type === 'follow') eventText = `${data.chatname} just followed!`;
-    else if (data.type === 'subscription') eventText = `${data.chatname} subscribed!`;
-    else if (data.type === 'donation') eventText = `${data.chatname} donated ${data.amount || ''}!`;
-    else if (data.type === 'gift') eventText = `${data.chatname} sent a gift!`;
-    else if (data.type === 'bits') eventText = `${data.chatname} cheered with bits!`;
-
-    eventDiv.innerHTML = `
-      <div class="username-box special">${data.chatname}</div>
-      <div class="text">🎉 ${eventText} 🎉</div>
-    `;
-    chatContainer.appendChild(eventDiv);
-  }
-
-  function addMessageToOverlay(data) {
-    if (!data || !data.chatname || !data.chatmessage) return;
-    if (['follow','subscription','donation','gift','bits'].includes(data.type)) {
-      addEventToOverlay(data);
-      return;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+      background: #000;
+      color: #fff;
     }
 
-    const messageContainer = document.createElement('div');
-    messageContainer.classList.add('message-container');
+    #chat-container {
+      display: none;
+      flex-direction: column-reverse;
+      justify-content: flex-start;
+      padding: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+      max-height: 100vh;
+      overflow-y: auto;
+    }
 
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
-    if (data.type === 'bot') messageDiv.classList.add('bot');
-    if (data.type === 'announcement') messageDiv.classList.add('announcement'); // 公告樣式
+    .message-container {
+      position: relative;
+      margin-bottom: 40px;
+      will-change: transform, opacity;
+      animation: slideUpFade 0.6s ease-out;
+    }
+    .message-container.fadeout {
+      animation: fadeOutOnly 10s ease-out forwards;
+      animation-delay: 30s;
+    }
+    .message-container.fadeout:hover {
+      animation-play-state: paused;
+      opacity: 1 !important;
+      transform: scale(1.03);
+      color: #fff !important;
+    }
 
-    messageDiv.innerHTML = `
-      <div class="username-box ${data.type || ''}">
-        <span>${data.chatname}</span>
-      </div>
-      <div class="text">${data.chatmessage}</div>
-    `;
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOutOnly {
+      from { opacity: 1; color: #fff; }
+      to   { opacity: 0; color: #aaa; }
+    }
 
-    messageContainer.appendChild(messageDiv);
-    chatContainer.appendChild(messageContainer);
+    .message {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      background: rgba(0,255,255,0.08);
+      padding: 5px;
+      border-radius: 10px;
+      color: #fff;
+      word-wrap: break-word;
+      border: 1px solid #00ffff;
+      box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+      font-size: 0.75em;
+      text-shadow: 1px 1px 2px #000, 0 0 6px rgba(255,255,255,0.8);
+    }
 
-    lastSender = data.chatname;
-    lastMessageDiv = messageContainer;
-  }
+    .message.announcement {
+      border: 2px solid #1e3a8a;
+      box-shadow: 0 0 6px #00ffff, 0 0 12px #00ffff;
+      font-weight: bold;
+    }
+    .username-box.announcement {
+      border: 2px solid #1e3a8a;
+      color: #3b82f6;
+      box-shadow: 0 0 6px #3b82f6;
+    }
 
-  function setupAutoPush(msg, idx) {
-    if (msg.timer) clearInterval(msg.timer);
-    msg.timer = setInterval(() => {
-      if (autoPushEnabled) pushAnnouncement(idx);
-    }, msg.interval);
-  }
+    .username-box {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 3px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      z-index: 2;
+      background: transparent;
+      font-size: 0.85em;
+      text-shadow: 1px 1px 2px #000;
+      opacity: 0.9;
+    }
 
-  function toggleAutoPush() {
-    autoPushEnabled = !autoPushEnabled;
-    document.getElementById("autoPushBtn").innerText = autoPushEnabled ? "暫停自動推送" : "啟用自動推送";
-  }
+    .username-box.twitch { border: 2px solid rgba(145,70,255,0.9); color: rgba(145,70,255,0.9); box-shadow: 0 0 6px rgba(145,70,255,0.9); }
+    .username-box.youtube { border: 2px solid rgba(255,0,0,0.9); color: rgba(255,0,0,0.9); box-shadow: 0 0 6px rgba(255,0,0,0.9); }
+    .username-box.kick { border: 2px solid rgba(0,255,128,0.9); color: rgba(0,255,128,0.9); box-shadow: 0 0 6px rgba(0,255,128,0.9); }
 
-  function moveUp(idx) {
-    if (idx <= 0) return;
-    [announcements[idx-1], announcements[idx]] = [announcements[idx], announcements[idx-1]];
-    refreshAnnouncementList();
-  }
+    .username-box.bot { box-shadow: none; }
+    .username-box.highlight { border-width: 2px; box-shadow: 0 0 10px currentColor, 0 0 20px currentColor; }
 
-  function moveDown(idx) {
-    if (idx >= announcements.length-1) return;
-    [announcements[idx+1], announcements[idx]] = [announcements[idx], announcements[idx+1]];
-    refreshAnnouncementList();
-  }
-</script>
+    .text { line-height: 1.4; word-break: break-word; }
+    .donation { padding: 5px 10px; color: #ffd700; font-weight: bold; font-size: 0.72em; }
+    .badge { height: 1em; vertical-align: middle; margin-left: 4px; }
+    .badges { margin-left: 6px; }
+
+    /* 管理介面樣式 */
+    #admin-container {
+      display: none;
+      margin: 20px;
+      background: #f5f5f5;
+      color: #000;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    #announcementList { margin-top: 20px; }
+    .announcement-item {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+    .announcement-item button { margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <div id="chat-container"></div>
+  <div id="admin-container">
+    <h1>公告管理後台</h1>
+    <label>公告內容：</label>
+    <input type="text" id="announcementText" placeholder="輸入公告文字">
+    <label>間隔秒數：</label>
+    <input type="number" id="announcementInterval" value="30">
+    <button id="addAnnouncement">新增公告</button>
+    <button id="updateAnnouncement">更新公告</button>
+    <button id="sendTest">送出測試訊息</button>
+    <div id="announcementList"></div>
+  </div>
+
+
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode') || 'chat';
+    const session = urlParams.get('session') || 'default';
+
+    const chatContainer = document.getElementById('chat-container');
+    const adminContainer = document.getElementById('admin-container');
+
+    const socket = new WebSocket("ws://localhost:8080");
+
+    if (mode === 'chat') {
+      chatContainer.style.display = "flex";
+      adminContainer.style.display = "none";
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.session && data.session !== session) return; // 過濾不同房間
+        addMessageToOverlay(data);
+      };
+
+      function addEventToOverlay(data) {
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+
+        const usernameBox = document.createElement('div');
+        usernameBox.classList.add('username-box', 'highlight');
+        usernameBox.textContent = data.chatname;
+
+        let eventText = '';
+        if (data.type === 'follow') eventText = `🎉 ${data.chatname} just followed! 🎉`;
+        else if (data.type === 'subscription') eventText = `🎉 ${data.chatname} subscribed! 🎉`;
+        else if (data.type === 'donation') eventText = `💰 ${data.chatname} donated ${data.amount || ''}! 💰`;
+        else if (data.type === 'gift') eventText = `🎁 ${data.chatname} sent a gift! 🎁`;
+        else if (data.type === 'bits') eventText = `✨ ${data.chatname} cheered with bits! ✨`;
+
+        const textDiv = document.createElement('div');
+        textDiv.classList.add('text');
+        textDiv.innerHTML = eventText;
+
+        messageDiv.appendChild(usernameBox);
+        messageDiv.appendChild(textDiv);
+        messageContainer.appendChild(messageDiv);
+        chatContainer.appendChild(messageContainer);
+      }
+
+      function addMessageToOverlay(data) {
+        if (!data || !data.chatname || !data.chatmessage) return;
+
+        if (['follow','subscription','donation','gift','bits'].includes(data.type)) {
+          addEventToOverlay(data);
+          return;
+        }
+
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        if (data.type === 'announcement') messageDiv.classList.add('announcement');
+
+        let chatbadges = "";
+        if (data.chatbadges) {
+          data.chatbadges.slice(0, 1).forEach(badge => {
+            if (badge.type === "img" && badge.src) {
+              chatbadges += `<img class='badge' src='${badge.src}' />`;
+            } else if (badge.type === "svg" && badge.html) {
+              chatbadges += `<span class='badge svg'>${badge.html}</span>`;
+            }
+          });
+        }
+
+        messageDiv.innerHTML = `
+          <div class="username-box ${data.type === 'announcement' ? 'announcement' : (data.platform || '')}">
+            <span>${data.chatname}</span>
+            <span class="badges">${chatbadges}</span>
+          </div>
+          <div class="text">${data.chatmessage}</div>
+        `;
+
+        messageContainer.appendChild(messageDiv);
+        chatContainer.appendChild(messageContainer);
+      }
+
+      window.onload = () => {
+        addMessageToOverlay({
+          chatname: "📢 系統測試",
+          chatmessage: "🗨️聊天室已成功啟動！",
+          type: "announcement",
+          session
+        });
+      };
+    }
+
+
+    if (mode === 'admin') {
+      chatContainer.style.display = "none";
+      adminContainer.style.display = "block";
+
+      let announcements = [];
+      let editingIndex = null;
+
+      function renderAnnouncements() {
+        const list = document.getElementById("announcementList");
+        list.innerHTML = "";
+        announcements.forEach((a, index) => {
+          const div = document.createElement("div");
+          div.className = "announcement-item";
+          div.innerHTML = `
+            <span>${a.text}（每 ${a.interval} 秒）</span>
+            <button onclick="editAnnouncement(${index})">修改</button>
+            <button onclick="deleteAnnouncement(${index})">刪除</button>
+          `;
+          list.appendChild(div);
+        });
+      }
+
+      document.getElementById("addAnnouncement").addEventListener("click", () => {
+        const text = document.getElementById("announcementText").value;
+        const interval = parseInt(document.getElementById("announcementInterval").value, 10);
+        announcements.push({ text, interval });
+        renderAnnouncements();
+        socket.send(JSON.stringify({ chatname: "📢 公告", chatmessage: text, type: "announcement", session }));
+      });
+
+      window.editAnnouncement = function(index) {
+        editingIndex = index;
+        const a = announcements[index];
+        document.getElementById("announcementText").value = a.text;
+        document.getElementById("announcementInterval").value = a.interval;
+      }
+
+      document.getElementById("updateAnnouncement").addEventListener("click", () => {
+        if (editingIndex !== null) {
+          announcements[editingIndex].text = document.getElementById("announcementText").value;
+          announcements[editingIndex].interval = parseInt(document.getElementById("announcementInterval").value, 10);
+          renderAnnouncements();
+          socket.send(JSON.stringify({ chatname: "📢 公告更新", chatmessage: announcements[editingIndex].text, type: "announcement", session }));
+          editingIndex = null;
+        }
+      });
+
+      window.deleteAnnouncement = function(index) {
+        announcements.splice(index, 1);
+        renderAnnouncements();
+      }
+
+      document.getElementById("sendTest").addEventListener("click", () => {
+        const testMsg = {
+          chatname: "📢 測試公告",
+          chatmessage: "這是一則測試訊息！",
+          type: "announcement",
+          session
+        };
+        socket.send(JSON.stringify(testMsg));
+      });
+    }
+  </script>
 </body>
 </html>
-
